@@ -8,6 +8,7 @@ import projectRoutes from "./routes/projectRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
 import documentRoutes from "./routes/documentRoutes.js";
+import employeeRoutes from "./routes/employeeRoutes.js";
 
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use("/api/tasks",taskRoutes);
 app.use("/api/invoices",invoiceRoutes);
 app.use("/api/documents",documentRoutes);
 app.use("/uploads",express.static("uploads"));
+app.use("/api/employees",employeeRoutes);
 const PORT = process.env.PORT || 5000;
 app.listen(PORT,()=>{
     console.log(`Server running on port ${PORT}`);
