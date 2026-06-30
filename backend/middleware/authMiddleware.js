@@ -17,3 +17,13 @@ export const protect = async(req,resizeBy,next)=>{
         res.status(401).json({message:"No token"});
     }
 };
+export const authorizeRoles = (...roles) => {
+  return (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+      return res.status(403).json({
+        message: `Role ${req.user.role} not allowed`,
+      });
+    }
+    next();
+  };
+};

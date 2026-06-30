@@ -13,7 +13,14 @@ export const createLead = async (req, res) => {
 // GET ALL LEADS
 export const getLeads = async (req, res) => {
   try {
-    const leads = await Lead.find().populate("assignedTo", "name email");
+    let leads;
+
+    if (req.user.role === "admin") {
+      leads = await Lead.find().populate("assignedTo", "name email");
+    } else {
+      leads = await Lead.find({ assignedTo: req.user._id });
+    }
+
     res.json(leads);
   } catch (error) {
     res.status(500).json({ message: error.message });
