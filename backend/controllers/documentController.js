@@ -1,7 +1,7 @@
 import Document from "../models/Document.js"
 import fs from "fs";
 import { PDFParse } from "pdf-parse";
-import analyzeDocument from "../utils/aiService.js";
+import { analyzeDocument } from "../utils/aiService.js";
 // upload
 export const uploadDocument = async(req,res)=>{
     try {
