@@ -43,13 +43,13 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/users", userRoutes);
 
 // SPA fallback - serve index.html for non-API routes
-app.use((req, res, next) => {
-  if (req.method === "GET" && !req.path.startsWith("/api") && !req.path.startsWith("/uploads")) {
-    res.sendFile("frontend/index.html", { root: "." });
-  } else {
-    next();
-  }
-});
+// app.use((req, res, next) => {
+//   if (req.method === "GET" && !req.path.startsWith("/api") && !req.path.startsWith("/uploads")) {
+//     res.sendFile("frontend/index.html", { root: "." });
+//   } else {
+//     next();
+//   }
+// });
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
