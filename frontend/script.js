@@ -1,4 +1,4 @@
-const API_BASE = "/api";
+const API_BASE = "https://crm-project-w8j1.onrender.com";
 
 const state = {
   isAuthenticated: false,
