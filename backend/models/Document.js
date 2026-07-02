@@ -1,13 +1,16 @@
 import mongoose from "mongoose";
-export const documentSchema = new mongoose.Schema({
-    type:{
-        type:String,
-        enum:["contract","invoice","nda","agreement"],
+const documentSchema = new mongoose.Schema({
+    name: {
+        type: String,
+        required: true
     },
+    category: {
+        type: String,
+        enum: ["Invoices", "Identity Proofs", "Contracts"],
+        default: "Contracts"
+    },
+    linkedTo: String,
+    uploader: String,
     fileUrl: String,
-    clientName: String,
-    expiryDate: Date,
-    amount:Number,
-    importantClause: String,
 },{timestamps:true});
 export default mongoose.model("Document",documentSchema);

@@ -3,8 +3,10 @@ const router = express.Router();
 
 import {
   uploadDocument,
+  uploadMetadata,
   getDocuments,
-  analyzeDoc
+  deleteDocument,
+  analyzeDoc,
 } from "../controllers/documentController.js";
 
 import { protect } from "../middleware/authMiddleware.js";
@@ -22,7 +24,9 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 router.post("/upload", protect, upload.single("file"), uploadDocument);
+router.post("/upload-metadata", protect, uploadMetadata);
 router.get("/", protect, getDocuments);
+router.delete("/:id", protect, deleteDocument);
 router.post("/analyze", protect, upload.single("file"), analyzeDoc);
 
 export default router;

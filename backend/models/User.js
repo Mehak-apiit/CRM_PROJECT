@@ -14,13 +14,18 @@ const userSchema = new mongoose.Schema(
         },
         password:{
             type:String,
-            requierd:true,
+            required:true,
             minlength:6
         },
         role:{
             type:String,
-            enum:["admin","employee"],
-            default:"employee"
+            enum:["superAdmin","admin"],
+            default:"admin"
+        },
+        status:{
+            type:String,
+            enum:["Active","Inactive"],
+            default:"Active"
         }
     },
     {timestamps:true}

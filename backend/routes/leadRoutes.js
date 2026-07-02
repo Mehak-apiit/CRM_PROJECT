@@ -1,6 +1,5 @@
 import express from "express";
-import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
-
+import { protect } from "../middleware/authMiddleware.js";
 import {
   createLead,
   getLeads,
@@ -13,10 +12,10 @@ import {
 const router = express.Router();
 
 router.post("/", protect, createLead);
-router.get("/", protect, authorizeRoles("admin"), getLeads);
+router.get("/", protect, getLeads);
 router.get("/:id", protect, getLeadById);
-router.put("/:id", protect, authorizeRoles("admin"), updateLead);
-router.delete("/:id", protect, authorizeRoles("admin"), deleteLead);
-router.put("/:id/assign", protect, authorizeRoles("admin"), assignLead);
+router.put("/:id", protect, updateLead);
+router.delete("/:id", protect, deleteLead);
+router.put("/:id/assign", protect, assignLead);
 
 export default router;

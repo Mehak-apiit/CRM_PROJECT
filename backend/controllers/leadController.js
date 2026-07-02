@@ -13,14 +13,7 @@ export const createLead = async (req, res) => {
 // GET ALL LEADS
 export const getLeads = async (req, res) => {
   try {
-    let leads;
-
-    if (req.user.role === "admin") {
-      leads = await Lead.find().populate("assignedTo", "name email");
-    } else {
-      leads = await Lead.find({ assignedTo: req.user._id });
-    }
-
+    const leads = await Lead.find();
     res.json(leads);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -31,11 +24,9 @@ export const getLeads = async (req, res) => {
 export const getLeadById = async (req, res) => {
   try {
     const lead = await Lead.findById(req.params.id);
-
     if (!lead) {
       return res.status(404).json({ message: "Lead not found" });
     }
-
     res.json(lead);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -48,7 +39,6 @@ export const updateLead = async (req, res) => {
     const lead = await Lead.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
-
     res.json(lead);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -68,14 +58,12 @@ export const deleteLead = async (req, res) => {
 // ASSIGN LEAD
 export const assignLead = async (req, res) => {
   try {
-    const { userId } = req.body;
-
+    const { assignedTo } = req.body;
     const lead = await Lead.findByIdAndUpdate(
       req.params.id,
-      { assignedTo: userId },
+      { assignedTo },
       { new: true }
     );
-
     res.json(lead);
   } catch (error) {
     res.status(500).json({ message: error.message });

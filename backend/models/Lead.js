@@ -2,20 +2,21 @@ import mongoose from "mongoose";
 
 const leadSchema = new mongoose.Schema(
   {
-    name: String,
+    clientName: {
+      type: String,
+      required: true,
+    },
     email: String,
     phone: String,
+    source: String,
 
     status: {
       type: String,
-      enum: ["new", "contacted", "qualified", "lost"],
-      default: "new",
+      enum: ["New", "In-Progress", "Converted", "Rejected"],
+      default: "New",
     },
 
-    assignedTo: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    },
+    assignedTo: String,
 
     notes: String,
 

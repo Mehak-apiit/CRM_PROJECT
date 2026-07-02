@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
-export const protect = async(req,resizeBy,next)=>{
+export const protect = async(req,res,next)=>{
     let token;
     if(req.headers.authorization?.startsWith("Bearer")){
         try {
@@ -8,13 +8,13 @@ export const protect = async(req,resizeBy,next)=>{
             const decoded = jwt.verify(token,process.env.JWT_SECRET);
             req.user = await User.findById(decoded.id).select("-password");
             next();
+            return;
         } catch (error) {
-            res.status(401).json({message:"Not authorized"});
-            
+            return res.status(401).json({message:"Not authorized"});
         }
     }
     if(!token){
-        res.status(401).json({message:"No token"});
+        return res.status(401).json({message:"No token"});
     }
 };
 export const authorizeRoles = (...roles) => {

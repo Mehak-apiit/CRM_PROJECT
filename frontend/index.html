@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta
+    name="description"
+    content="Comprehensive CRM front-end with dashboard, lead, employee, and document management."
+  />
+  <title>SunInnovation CRM | Frontend Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet"
+  />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <section id="loginPage" class="login-page">
+    <div class="login-brand-wrap">
+      <img src="assets/logo-new.png" alt="Sun innovation Web Tech logo" class="login-logo" />
+      <h1>CRM System</h1>
+      <p>Sign in to manage your business</p>
+    </div>
+
+    <div class="login-card">
+      <form id="loginPageForm" class="dynamic-form">
+        <label>
+          Email Address
+          <input type="email" id="loginEmail" required placeholder="you@example.com" />
+        </label>
+        <label>
+          Password
+          <input type="password" id="loginPassword" required placeholder="........" />
+        </label>
+        <label>
+          Login As
+          <select id="loginRole" required>
+            <option value="superAdmin">Super Admin</option>
+            <option value="admin">Admin</option>
+          </select>
+        </label>
+        <button type="submit" class="primary-btn login-submit-btn">Sign In</button>
+      </form>
+      <div class="login-help">
+        <p>Demo Credentials:</p>
+        <small>Super Admin: superadmin@crm.com / admin123</small>
+        <small>Admin: admin@crm.com / admin123</small>
+      </div>
+    </div>
+  </section>
+
+  <div class="app-shell hidden" id="appShell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <img src="assets/logo-new.png" alt="Sun innovation Web Tech logo" class="brand-logo-image" />
+        <div>
+          <h1>CRM System</h1>
+          <p>Sun innovation Web Tech</p>
+        </div>
+      </div>
+
+      <nav class="nav-links" aria-label="Primary navigation">
+        <button class="nav-btn active" data-view="dashboard">Dashboard</button>
+        <button class="nav-btn" data-view="leads">Lead Management</button>
+        <button class="nav-btn" data-view="employees">Employee Directory</button>
+        <button class="nav-btn" data-view="documents">Document Vault</button>
+        <button class="nav-btn" data-view="userManagement">User Management</button>
+        <button class="nav-btn" data-view="reports">Reports & Audit</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <small>Frontend Demo</small>
+        <button id="logoutBtn" class="ghost-btn">Logout</button>
+      </div>
+    </aside>
+
+    <main class="main-panel">
+      <header class="top-bar">
+        <button id="menuToggle" class="menu-toggle" aria-label="Toggle menu">☰</button>
+        <div>
+          <h2 id="pageTitle">Dashboard</h2>
+          <p id="pageSubtitle">Real-time snapshot of CRM operations</p>
+        </div>
+
+        <div class="top-actions">
+          <label class="role-picker">
+            Role
+            <select id="roleSelect">
+              <option value="superAdmin">Super Admin</option>
+              <option value="admin">Admin</option>
+            </select>
+          </label>
+          <button id="switchAccountBtn" class="primary-btn">Switch Account</button>
+        </div>
+      </header>
+
+      <section id="dashboardView" class="view active-view">
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <div class="panel-grid">
+          <article class="card">
+            <div class="card-head">
+              <h3>Lead Funnel</h3>
+            </div>
+            <div id="leadFunnel" class="funnel-list"></div>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <h3>Recent Activity Log</h3>
+            </div>
+            <ul id="activityLog" class="log-list"></ul>
+          </article>
+        </div>
+      </section>
+
+      <section id="leadsView" class="view">
+        <div class="card">
+          <div class="card-head responsive-head">
+            <h3>Lead Management</h3>
+            <button id="addLeadBtn" class="primary-btn">+ Add Lead</button>
+          </div>
+
+          <div class="filters">
+            <label>
+              Status
+              <select id="leadStatusFilter">
+                <option value="all">All</option>
+              </select>
+            </label>
+            <label>
+              Source
+              <select id="leadSourceFilter">
+                <option value="all">All</option>
+              </select>
+            </label>
+            <label>
+              Assigned To
+              <select id="leadAssigneeFilter">
+                <option value="all">All</option>
+              </select>
+            </label>
+            <label>
+              Search
+              <input id="leadSearch" type="search" placeholder="Client name / email" />
+            </label>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Client</th>
+                  <th>Phone</th>
+                  <th>Email</th>
+                  <th>Source</th>
+                  <th>Status</th>
+                  <th>Assigned</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leadTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="employeesView" class="view">
+        <div class="card">
+          <div class="card-head responsive-head">
+            <h3>Employee Management</h3>
+            <button id="addEmployeeBtn" class="primary-btn">+ Add Employee</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Joining Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="employeeTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="documentsView" class="view">
+        <div class="card">
+          <div class="card-head responsive-head">
+            <h3>Document Management</h3>
+            <button id="addDocumentBtn" class="primary-btn">Upload Document</button>
+          </div>
+
+          <p class="section-hint">Manage all your business documents</p>
+
+          <div class="document-stats-grid" id="documentStatsGrid"></div>
+
+          <div class="document-toolbar">
+            <input id="documentSearch" type="search" placeholder="Search documents..." />
+            <select id="documentCategoryFilter">
+              <option value="all">All Categories</option>
+            </select>
+          </div>
+
+          <div id="documentGrid" class="document-grid"></div>
+
+          <div id="documentEmptyState" class="document-empty hidden">
+            No documents found for selected filter.
+          </div>
+        </div>
+      </section>
+
+      <section id="reportsView" class="view">
+        <div class="panel-grid">
+          <article class="card">
+            <div class="card-head">
+              <h3>Security & Governance</h3>
+            </div>
+            <ul class="plain-list">
+              <li>Encrypted role-based mock authentication flow.</li>
+              <li>Audit trail for major CRUD actions and role changes.</li>
+              <li>Super Admin can access global analytics and user controls.</li>
+              <li>Admin has restricted operational scope.</li>
+            </ul>
+          </article>
+
+          <article class="card">
+            <div class="card-head">
+              <h3>Quick Analytics</h3>
+            </div>
+            <div id="quickAnalytics" class="analytics-list"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="userManagementView" class="view">
+        <div class="card user-management-wrap">
+          <h3 class="um-page-title">User Management</h3>
+          <div class="um-banner">
+            <h4>User Management</h4>
+            <p>Super Admin Panel - Manage system administrators and their access levels</p>
+          </div>
+
+          <div class="document-stats-grid" id="userStatsGrid"></div>
+
+          <div class="document-toolbar">
+            <input id="userSearch" type="search" placeholder="Search users..." />
+            <button id="addUserBtn" class="primary-btn">+ Add User</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>User</th>
+                  <th>Role</th>
+                  <th>Status</th>
+                  <th>Created Date</th>
+                  <th>Last Login</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="userTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="modalOverlay" class="modal-overlay hidden" aria-hidden="true">
+    <div class="modal">
+      <div class="modal-head">
+        <h3 id="modalTitle">Create Record</h3>
+        <button id="closeModalBtn" class="icon-btn" aria-label="Close modal">✕</button>
+      </div>
+      <form id="dynamicForm" class="dynamic-form"></form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -26,13 +26,13 @@ export const registerUser = async(req,res)=>{
             name,
             email,
             password: hashedPassword,
-            role
+            role: role || "admin"
         });
         res.status(201).json({
             _id: user._id,
             name:user.name,
             email:user.email,
-            role:user.roel,
+            role:user.role,
             token:generateToken(user._id)
         });
     } catch (error) {

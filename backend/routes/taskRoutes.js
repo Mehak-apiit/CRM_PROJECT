@@ -10,9 +10,9 @@ import {
 
 import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
 
-router.post("/", protect, createTask);
+router.post("/", protect, authorizeRoles("admin", "superAdmin"), createTask);
 router.get("/", protect, getTasks);
 router.put("/:id", protect, updateTask);
-router.delete("/:id", protect, authorizeRoles("admin"), deleteTask);
+router.delete("/:id", protect, authorizeRoles("admin", "superAdmin"), deleteTask);
 
 export default router;
