@@ -27,7 +27,7 @@ const start = async () => {
 start();
 
 // Serve frontend static files
-app.use(express.static("frontend"));
+//app.use(express.static("frontend"));
 
 // Serve uploads
 app.use("/uploads", express.static("uploads"));
