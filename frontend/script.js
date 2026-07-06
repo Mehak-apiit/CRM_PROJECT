@@ -1,4 +1,6 @@
-const API_BASE = "https://crm-project-w8j1.onrender.com/api";
+const API_BASE = window.location.hostname === "localhost"
+  ? "http://localhost:5000/api"
+  : "https://crm-project-w8j1.onrender.com/api";
 
 const state = {
   isAuthenticated: false,

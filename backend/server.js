@@ -17,7 +17,14 @@ const app = express();
 
 // middleware
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+  origin: [
+    process.env.FRONTEND_URL,
+    "http://localhost:5000",
+    "http://localhost:3000",
+  ],
+  credentials: true,
+}));
 
 // DB connect
 const start = async () => {
