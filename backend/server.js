@@ -11,6 +11,7 @@ import documentRoutes from "./routes/documentRoutes.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import seedUsers from "./utils/seed.js";
+import internRoutes from "./routes/intern.routes.js";
 
 dotenv.config();
 const app = express();
@@ -48,6 +49,7 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/interns",internRoutes);
 
 // SPA fallback - serve index.html for non-API routes
 // app.use((req, res, next) => {
