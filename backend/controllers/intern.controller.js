@@ -45,7 +45,7 @@ export const issueCertificate = async(req,res)=>{
             {new: true}
         );
         res.json(intern)
-    } catch (error) {
+    } catch (err) {
         res.status(500).json({message:err.message});
         
     }

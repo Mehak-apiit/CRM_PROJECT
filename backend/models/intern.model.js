@@ -13,8 +13,7 @@ const internSchema = new mongoose.Schema({
     },
     // Letters & Certificates
     CertificateIssued: {type: Boolean, default: false},
-    experienceLetterIssued: {type:Boolean, default: false},
-    joiningLetterIssued: {type: Boolean, default: false},
+    
 
     issueDate: Date,
     //Qualification
