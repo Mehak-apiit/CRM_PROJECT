@@ -65,6 +65,7 @@
         <button class="nav-btn active" data-view="dashboard">Dashboard</button>
         <button class="nav-btn" data-view="leads">Lead Management</button>
         <button class="nav-btn" data-view="employees">Employee Directory</button>
+        <button class="nav-btn" data-view="interns">Intern Management</button>
         <button class="nav-btn" data-view="documents">Document Vault</button>
         <button class="nav-btn" data-view="userManagement">User Management</button>
         <button class="nav-btn" data-view="reports">Reports & Audit</button>
@@ -186,6 +187,51 @@
                 </tr>
               </thead>
               <tbody id="employeeTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section id="internsView" class="view">
+        <div class="card">
+          <div class="card-head responsive-head">
+            <div>
+              <h3>Intern Management</h3>
+              <p class="section-hint">Track intern onboarding, progress, and certificates</p>
+            </div>
+            <button id="addInternBtn" class="primary-btn">+ Add Intern</button>
+          </div>
+
+          <div class="filters">
+            <label>
+              Status
+              <select id="internStatusFilter">
+                <option value="all">All Statuses</option>
+                <option value="Ongoing">Ongoing</option>
+                <option value="Completed">Completed</option>
+                <option value="Dropped">Dropped</option>
+              </select>
+            </label>
+            <label>
+              Search
+              <input id="internSearch" type="search" placeholder="Name, email, college" />
+            </label>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Intern</th>
+                  <th>Contact</th>
+                  <th>Department</th>
+                  <th>College</th>
+                  <th>Status</th>
+                  <th>Certificate</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="internTableBody"></tbody>
             </table>
           </div>
         </div>

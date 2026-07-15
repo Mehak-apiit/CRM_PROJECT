@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { Certificates } from "openai/resources/admin/organization/certificates.js";
 const internSchema = new mongoose.Schema({
     //Basic Infor
     name: {type:String, required: true},
@@ -12,8 +11,14 @@ const internSchema = new mongoose.Schema({
         default: "Ongoing"
     },
     // Letters & Certificates
+// <<<<<<< HEAD
     CertificateIssued: {type: Boolean, default: false},
     
+// =======
+//     certificateIssued: {type: Boolean, default: false},
+//     experienceLetterIssued: {type:Boolean, default: false},
+//     joiningLetterIssued: {type: Boolean, default: false},
+// >>>>>>> b5a1ed3e7473ff90081e28b9fb00861f15ccfd80
 
     issueDate: Date,
     //Qualification
