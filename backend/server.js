@@ -1,6 +1,8 @@
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
+import { fileURLToPath } from "url";
+import path from "path";
 import connectDB from "./config/db.js";
 import authRoutes from "./routes/authRoutes.js";
 import leadRoutes from "./routes/leadRoutes.js";
@@ -13,7 +15,9 @@ import userRoutes from "./routes/userRoutes.js";
 import seedUsers from "./utils/seed.js";
 import internRoutes from "./routes/intern.routes.js";
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+dotenv.config({ path: path.join(__dirname, ".env") });
 const app = express();
 
 // middleware
@@ -34,8 +38,8 @@ const start = async () => {
 };
 start();
 
-// Serve frontend static files
-//app.use(express.static("frontend"));
+// Serve the frontend from the same local server as the API.
+app.use(express.static(path.join(__dirname, "../frontend")));
 
 // Serve uploads
 app.use("/uploads", express.static("uploads"));
@@ -51,14 +55,14 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/interns",internRoutes);
 
-// SPA fallback - serve index.html for non-API routes
-// app.use((req, res, next) => {
-//   if (req.method === "GET" && !req.path.startsWith("/api") && !req.path.startsWith("/uploads")) {
-//     res.sendFile("frontend/index.html", { root: "." });
-//   } else {
-//     next();
-//   }
-// });
+// SPA fallback - serve index.html for non-API routes.
+app.use((req, res, next) => {
+  if (req.method === "GET" && !req.path.startsWith("/api") && !req.path.startsWith("/uploads")) {
+    res.sendFile(path.join(__dirname, "../frontend/index.html"));
+  } else {
+    next();
+  }
+});
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

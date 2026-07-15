@@ -10,6 +10,7 @@ const state = {
   activeView: "dashboard",
   leads: [],
   employees: [],
+  interns: [],
   documents: [],
   users: [],
   activityLogs: [],
@@ -29,6 +30,7 @@ const api = {
   get: (path) => api.request("GET", path),
   post: (path, body) => api.request("POST", path, body),
   put: (path, body) => api.request("PUT", path, body),
+  patch: (path, body) => api.request("PATCH", path, body),
   delete: (path) => api.request("DELETE", path),
 };
 
@@ -36,6 +38,7 @@ const views = {
   dashboard: { title: "Dashboard", subtitle: "Real-time snapshot of CRM operations" },
   leads: { title: "Lead Management", subtitle: "Track lead lifecycle with advanced controls" },
   employees: { title: "Employee Directory", subtitle: "Manage personnel onboarding and performance visibility" },
+  interns: { title: "Intern Management", subtitle: "Manage intern records, progress, and certificates" },
   documents: { title: "Document Vault", subtitle: "Centralized repository for secure file metadata" },
   userManagement: { title: "User Management", subtitle: "Super Admin panel for administrator access control" },
   reports: { title: "Reports & Audit", subtitle: "System governance, intelligence, and access transparency" },
@@ -50,6 +53,9 @@ const pageSubtitle = document.getElementById("pageSubtitle");
 const roleSelect = document.getElementById("roleSelect");
 const leadTableBody = document.getElementById("leadTableBody");
 const employeeTableBody = document.getElementById("employeeTableBody");
+const internTableBody = document.getElementById("internTableBody");
+const internStatusFilter = document.getElementById("internStatusFilter");
+const internSearch = document.getElementById("internSearch");
 const documentStatsGrid = document.getElementById("documentStatsGrid");
 const documentGrid = document.getElementById("documentGrid");
 const documentSearch = document.getElementById("documentSearch");
@@ -88,13 +94,15 @@ function addActivity(message) {
 
 async function loadData() {
   try {
-    const [leads, employees, documents] = await Promise.all([
+    const [leads, employees, interns, documents] = await Promise.all([
       api.get("/leads"),
       api.get("/employees"),
+      api.get("/interns"),
       api.get("/documents"),
     ]);
     state.leads = leads;
     state.employees = employees;
+    state.interns = interns;
     state.documents = documents;
 
     if (state.role === "superAdmin") {
@@ -248,6 +256,36 @@ function renderEmployeeTable() {
     `
     )
     .join("");
+}
+
+function renderInternTable() {
+  const status = internStatusFilter.value;
+  const search = internSearch.value.trim().toLowerCase();
+  const interns = state.interns.filter((intern) => {
+    const statusMatch = status === "all" || intern.internshipStatus === status;
+    const searchMatch = !search || [intern.name, intern.email, intern.college, intern.department]
+      .filter(Boolean)
+      .some((value) => value.toLowerCase().includes(search));
+    return statusMatch && searchMatch;
+  });
+
+  internTableBody.innerHTML = interns.length
+    ? interns.map((intern) => `
+      <tr>
+        <td><strong>${intern.name}</strong><br /><small>${intern.highestQualification || "Qualification not set"}</small></td>
+        <td>${intern.email}<br /><small>${intern.phone || "No phone number"}</small></td>
+        <td>${intern.department || "-"}</td>
+        <td>${intern.college || "-"}</td>
+        <td><span class="badge ${getBadgeClass(intern.internshipStatus)}">${intern.internshipStatus}</span></td>
+        <td>${intern.certificateIssued ? "Issued" : "Not issued"}</td>
+        <td>
+          <button class="action-btn edit-intern" data-id="${intern._id}">Edit</button>
+          ${!intern.certificateIssued ? `<button class="action-btn issue-certificate" data-id="${intern._id}">Issue Certificate</button>` : ""}
+          <button class="action-btn delete-intern" data-id="${intern._id}">Delete</button>
+        </td>
+      </tr>
+    `).join("")
+    : `<tr><td colspan="7">No interns found.</td></tr>`;
 }
 
 function getFilteredDocuments() {
@@ -449,6 +487,7 @@ function renderAll() {
   renderLeadFilters();
   renderLeadTable();
   renderEmployeeTable();
+  renderInternTable();
   renderDocumentFilters();
   renderDocumentStats();
   renderDocumentCards();
@@ -489,6 +528,8 @@ function bindEvents() {
   [leadStatusFilter, leadSourceFilter, leadAssigneeFilter, leadSearch].forEach((el) => {
     el.addEventListener("input", renderLeadTable);
   });
+  [internStatusFilter, internSearch].forEach((el) => el.addEventListener("input", renderInternTable));
+  internStatusFilter.addEventListener("change", renderInternTable);
   [documentSearch, documentCategoryFilter].forEach((el) => {
     el.addEventListener("input", renderDocumentCards);
     el.addEventListener("change", renderDocumentCards);
@@ -528,6 +569,27 @@ function bindEvents() {
       async (data) => {
         await api.post("/employees", data);
         addActivity(`Employee '${data.name}' onboarded.`);
+      }
+    );
+  });
+
+  document.getElementById("addInternBtn").addEventListener("click", () => {
+    openModal(
+      "Add Intern",
+      [
+        { label: "Full Name", name: "name", type: "text" },
+        { label: "Email", name: "email", type: "email" },
+        { label: "Phone", name: "phone", type: "text" },
+        { label: "Department", name: "department", type: "text" },
+        { label: "College", name: "college", type: "text" },
+        { label: "Highest Qualification", name: "highestQualification", type: "text" },
+        { label: "Graduation Year", name: "graduationYear", type: "number" },
+        { label: "Internship Status", name: "internshipStatus", type: "select", options: ["Ongoing", "Completed", "Dropped"], value: "Ongoing" },
+      ],
+      async (data) => {
+        data.graduationYear = Number(data.graduationYear);
+        await api.post("/interns", data);
+        addActivity(`Intern '${data.name}' added.`);
       }
     );
   });
@@ -620,6 +682,51 @@ function bindEvents() {
       await api.delete(`/employees/${id}`);
       addActivity(`Employee '${employee.name}' removed.`);
       await refreshData();
+    }
+  });
+
+  internTableBody.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const id = target.dataset.id;
+    const intern = state.interns.find((item) => item._id === id);
+    if (!id || !intern) return;
+
+    try {
+      if (target.classList.contains("delete-intern")) {
+        await api.delete(`/interns/${id}`);
+        addActivity(`Intern '${intern.name}' removed.`);
+        await refreshData();
+      }
+
+      if (target.classList.contains("issue-certificate")) {
+        await api.patch(`/interns/${id}/certificate`, {});
+        addActivity(`Certificate issued for '${intern.name}'.`);
+        await refreshData();
+      }
+
+      if (target.classList.contains("edit-intern")) {
+        openModal(
+          "Edit Intern",
+          [
+            { label: "Full Name", name: "name", type: "text", value: intern.name },
+            { label: "Email", name: "email", type: "email", value: intern.email },
+            { label: "Phone", name: "phone", type: "text", value: intern.phone },
+            { label: "Department", name: "department", type: "text", value: intern.department },
+            { label: "College", name: "college", type: "text", value: intern.college },
+            { label: "Highest Qualification", name: "highestQualification", type: "text", value: intern.highestQualification },
+            { label: "Graduation Year", name: "graduationYear", type: "number", value: intern.graduationYear },
+            { label: "Internship Status", name: "internshipStatus", type: "select", options: ["Ongoing", "Completed", "Dropped"], value: intern.internshipStatus },
+          ],
+          async (data) => {
+            data.graduationYear = Number(data.graduationYear);
+            await api.put(`/interns/${id}`, data);
+            addActivity(`Intern '${data.name}' updated.`);
+          }
+        );
+      }
+    } catch (error) {
+      alert("Error: " + error.message);
     }
   });
 

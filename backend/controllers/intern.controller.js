@@ -5,7 +5,20 @@ export const createIntern = async (req, res) => {
         const intern = await Intern.create(req.body);
         res.status(201).json(intern);
     } catch (err) {
-        res.status(500).json({ message: err.message });
+        res.status(400).json({ message: err.message });
+    }
+};
+
+export const updateIntern = async (req, res) => {
+    try {
+        const intern = await Intern.findByIdAndUpdate(req.params.id, req.body, {
+            new: true,
+            runValidators: true,
+        });
+        if (!intern) return res.status(404).json({ message: "Intern not found" });
+        res.json(intern);
+    } catch (err) {
+        res.status(400).json({ message: err.message });
     }
 };
 //Get all interns
@@ -28,6 +41,8 @@ export const updateInternsStatus = async (req, res) => {
             { internshipStatus: req.body.status },
             { new: true }
         );
+        if (!intern) return res.status(404).json({ message: "Intern not found" });
+        res.json(intern);
     } catch (err) {
         res.status(500).json({message:err.message});
 
@@ -36,7 +51,7 @@ export const updateInternsStatus = async (req, res) => {
 //Issue Certificate and letters
 export const issueCertificate = async(req,res)=>{
     try {
-        const intern = await intern.findByIdAndUpdate(
+        const intern = await Intern.findByIdAndUpdate(
             req.params.id,
             {
                 certificateIssued: true,
@@ -44,10 +59,21 @@ export const issueCertificate = async(req,res)=>{
             },
             {new: true}
         );
+        if (!intern) return res.status(404).json({ message: "Intern not found" });
         res.json(intern)
     } catch (error) {
-        res.status(500).json({message:err.message});
+        res.status(500).json({message: error.message});
         
+    }
+};
+
+export const deleteIntern = async (req, res) => {
+    try {
+        const intern = await Intern.findByIdAndDelete(req.params.id);
+        if (!intern) return res.status(404).json({ message: "Intern not found" });
+        res.json({ message: "Intern deleted" });
+    } catch (err) {
+        res.status(500).json({ message: err.message });
     }
 };
 
