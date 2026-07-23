@@ -39,11 +39,12 @@ body {
 }
 
 .login-logo {
-  width: min(180px, 42vw);
-  aspect-ratio: 1 / 1;
+  width: clamp(170px, 15vw, 200px);
+  aspect-ratio: 2 / 1;
   object-fit: contain;
   height: auto;
   border-radius: 4px;
+  margin-bottom: 20px;
 }
 
 .login-brand-wrap h1 {
@@ -61,6 +62,7 @@ body {
   border-radius: 14px;
   box-shadow: var(--shadow);
   padding: 1.1rem;
+  margin-bottom: auto;
 }
 
 .login-submit-btn {
@@ -288,12 +290,13 @@ input {
 .card-head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 0.8rem;
 }
 
 .card h3 {
   margin: 0;
+  line-height: 1.2;
 }
 
 .funnel-list,
@@ -339,10 +342,14 @@ input {
   border-radius: 10px;
 }
 
+.intern {
+  margin-bottom: 0px;
+}
 .section-hint {
-  margin: -0.4rem 0 0.9rem;
+  margin: 0.5rem 0 0.9rem;
   color: var(--muted);
   font-size: 0.86rem;
+  line-height: 1.5;
 }
 
 .document-stats-grid {

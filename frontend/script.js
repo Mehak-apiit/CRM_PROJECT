@@ -597,12 +597,45 @@ function bindEvents() {
 
   document.getElementById("addDocumentBtn").addEventListener("click", () => {
     openModal(
-      "Upload Document Metadata",
+      "Upload Document",
       [
-        { label: "Document Name", name: "name", type: "text" },
-        { label: "Category", name: "category", type: "select", options: ["Invoices", "Identity Proofs", "Contracts"], value: "Contracts" },
-        { label: "Linked Lead/Employee", name: "linkedTo", type: "text" },
-        { label: "Uploader", name: "uploader", type: "text" },
+        { 
+          label: "Upload Document", 
+          name: "file",
+          type: "file" 
+        },
+        {
+          label: "Document Name",
+          name: "documentname",
+          type: "text"
+        },
+        {
+          label: "Document Type", 
+          name: "documentType", 
+          type: "select", 
+          options: 
+          ["Resume", "Offer Letter", "Contract", "Certificate"
+          ]
+        },
+        { 
+          label: "Owner Type", 
+          name: "ownerType", 
+          type: "select",
+          options: [
+            "Intern",
+            "Employee",
+            "Lead"
+          ]
+        },
+        {  
+          label: "Select Intern",
+          name: "owner",
+          type: "select",
+          options: [
+            "Intern",
+            "Employee"
+          ]
+        }
       ],
       async (data) => {
         await api.post("/documents/upload-metadata", data);
