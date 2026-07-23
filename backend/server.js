@@ -9,11 +9,11 @@ import leadRoutes from "./routes/leadRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import invoiceRoutes from "./routes/invoiceRoutes.js";
-import documentRoutes from "./routes/documentRoutes.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import seedUsers from "./utils/seed.js";
 import internRoutes from "./routes/intern.routes.js";
+import documentRoutes from "./routes/documentRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -54,6 +54,7 @@ app.use("/api/documents", documentRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/interns",internRoutes);
+app.use("/api/documents",documentRoutes);
 
 // SPA fallback - serve index.html for non-API routes.
 app.use((req, res, next) => {

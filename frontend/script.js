@@ -1,6 +1,7 @@
 const API_BASE = window.location.hostname === "localhost"
   ? "http://localhost:5000/api"
   : "http://sk0xga0n7mpds52m52v6kvb0.200.97.160.249.sslip.io/api";
+  
 
 const state = {
   isAuthenticated: false,

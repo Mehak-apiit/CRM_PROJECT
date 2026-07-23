@@ -1,32 +1,22 @@
 import express from "express";
+import {uploadDocument,getMyDocuments} from "../controllers/documentController.js";
+import {protect,authorizeRoles} from "../middleware/authMiddleware.js";
+import upload from "../middleware/uploadMiddleware.js";
 const router = express.Router();
+// ADMIN UPLOAD
+router.post(
+  "/upload",
+  protect,
+  authorizeRoles("admin","superAdmin"),
+  upload.single("file"),
+  uploadDocument
 
-import {
-  uploadDocument,
-  uploadMetadata,
-  getDocuments,
-  deleteDocument,
-  analyzeDoc,
-} from "../controllers/documentController.js";
-
-import { protect } from "../middleware/authMiddleware.js";
-import multer from "multer";
-
-// Multer setup
-const storage = multer.diskStorage({
-  destination: "uploads/",
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, file.fieldname + "-" + uniqueSuffix);
-  },
-});
-
-const upload = multer({ storage });
-
-router.post("/upload", protect, upload.single("file"), uploadDocument);
-router.post("/upload-metadata", protect, uploadMetadata);
-router.get("/", protect, getDocuments);
-router.delete("/:id", protect, deleteDocument);
-router.post("/analyze", protect, upload.single("file"), analyzeDoc);
-
+);
+// EMPLOYEE/INTERN VIEW
+router.get(
+  "/my",
+  protect,
+  authorizeRoles("employee","intern"),
+  getMyDocuments
+);
 export default router;

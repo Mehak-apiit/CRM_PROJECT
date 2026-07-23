@@ -22,6 +22,11 @@ const employeeSchema = new mongoose.Schema({
         enum: ["Active", "Inactive"],
         default: "Active"
     },
+    userId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"User"
+
+    },
     attendance: [
         {
             date: { type: Date, default: Date.now },

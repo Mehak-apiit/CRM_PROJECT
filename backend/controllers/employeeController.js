@@ -1,10 +1,35 @@
 import Employee from "../models/Employee.js";
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 
 // Create Employee
 export const createEmployee = async (req, res) => {
   try {
-    const emp = await Employee.create(req.body);
-    res.status(201).json(emp);
+    const {
+      name,
+      email,
+      password,
+      position
+    } = req.body;
+    // create user for login
+    const hashedPassword = await bcrypt.hash(password,10);
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "employee"
+    });
+    // create employee profile
+    const employee = await Employee.create({
+      name,
+      email,
+      position,
+      userId:user._id
+    });
+    res.status(201).json({
+      message:"Employee created successfully",
+      employee
+    });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
