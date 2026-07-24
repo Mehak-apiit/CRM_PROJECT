@@ -28,10 +28,10 @@ const api = {
     if (!res.ok) throw new Error(data.message || "Request failed");
     return data;
   },
-  async uploadFile(path, formData) {
+  async uploadFile(method, path, formData) {
     const headers = {};
     if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
-    const opts = { method: "POST", headers, body: formData };
+    const opts = { method, headers, body: formData };
     const res = await fetch(`${API_BASE}${path}`, opts);
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Upload failed");
@@ -743,7 +743,7 @@ function bindEvents() {
           const formData = new FormData();
           formData.append("certificate", file);
           try {
-            await api.uploadFile(`/interns/${id}/certificate`, formData);
+            await api.uploadFile("PATCH", `/interns/${id}/certificate`, formData);
             addActivity(`Certificate issued for '${intern.name}'.`);
             await refreshData();
           } catch (err) {
