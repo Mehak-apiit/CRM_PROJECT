@@ -1,6 +1,7 @@
 import Intern from "../models/intern.model.js";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
+import Certificate from "../models/certificate.model.js";
 //Create Intern
 export const createIntern = async (req, res) => {
     try {
@@ -42,7 +43,7 @@ export const createIntern = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
-
+//update intern
 export const updateIntern = async (req, res) => {
     try {
         const intern = await Intern.findByIdAndUpdate(req.params.id, req.body, {
@@ -82,28 +83,27 @@ export const updateInternsStatus = async (req, res) => {
 
     }
 };
-//Issue Certificate and letters
+//Issue Certificate 
 export const issueCertificate = async(req,res)=>{
     try {
-        const intern = await Intern.findByIdAndUpdate(
-            req.params.id,
-            {
-                certificateIssued: true,
-                issueDate: new Date()
-            },
-            {new: true}
-        );
-        if (!intern) return res.status(404).json({ message: "Intern not found" });
-        res.json(intern)
-
-    } catch (err) {
-        res.status(500).json({message:err.message});
-    }
-//     catch (error) {
-//         res.status(500).json({message: error.message});
-// >>>>>>> b5a1ed3e7473ff90081e28b9fb00861f15ccfd80
+        const {internId} = req.body;
+        const intern = await Intern.findById(internId);
+        if(!intern){
+            return res.status(404).json({message:"Intern not found"});
+            // dummy test certificate
+            const certificate = await Certificate.create({
+                internId,
+                issuedBy: req.user.id,
+                certificateUrl:`Certificate_for_${intern.name}.pdf`
+            });
+            res.status(200).json({
+                message:"Certificate issued successfully",certificate
+            });
+        }
+    } catch (error) {
+        res.status(500).json({message:error.message});
         
-//     }
+    }
 };
 
 export const deleteIntern = async (req, res) => {
@@ -116,3 +116,15 @@ export const deleteIntern = async (req, res) => {
     }
 };
 
+// Get my certificate
+export const getMyCertificate = async(req,res)=>{
+    try {
+        const certificate = await Certificate.find({
+            internId:req.user.id
+        });
+        res.status(200).json(certificate);
+    } catch (error) {
+        res.status(500).json({message:error.message});
+        
+    }
+};
