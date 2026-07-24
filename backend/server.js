@@ -64,8 +64,12 @@ app.use(
 
 // Ensure uploads directory exists
 const uploadsDir = path.join(__dirname, "../uploads");
+const certsDir = path.join(uploadsDir, "certificates");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
+}
+if (!fs.existsSync(certsDir)) {
+  fs.mkdirSync(certsDir, { recursive: true });
 }
 
 // DB connect + seed

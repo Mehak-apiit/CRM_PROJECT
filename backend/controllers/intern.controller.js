@@ -2,6 +2,8 @@ import Intern from "../models/intern.model.js";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import Certificate from "../models/certificate.model.js";
+import path from "path";
+import fs from "fs";
 //Create Intern
 export const createIntern = async (req, res) => {
     try {
@@ -88,24 +90,50 @@ export const updateInternsStatus = async (req, res) => {
 //Issue Certificate 
 export const issueCertificate = async(req,res)=>{
     try {
+        if(!req.file){
+            return res.status(400).json({message:"Please upload a PDF certificate file"});
+        }
         const intern = await Intern.findById(req.params.id);
         if(!intern){
             return res.status(404).json({message:"Intern not found"});
         }
+        const certPath = `/uploads/certificates/${req.file.filename}`;
         intern.certificateIssued = true;
+        intern.certificateUrl = certPath;
         intern.issueDate = new Date();
         await intern.save();
         const certificate = await Certificate.create({
             internId: intern._id,
             issuedBy: req.user._id,
-            certificateUrl:`Certificate_for_${intern.name}.pdf`
+            certificateUrl: certPath
         });
         res.status(200).json({
-            message:"Certificate issued successfully",certificate
+            message:"Certificate issued successfully",
+            certificate,
+            certificateUrl: certPath
         });
     } catch (error) {
         res.status(500).json({message:error.message});
-        
+    }
+};
+
+// Download Certificate
+export const downloadCertificate = async(req,res)=>{
+    try {
+        const intern = await Intern.findById(req.params.id);
+        if(!intern){
+            return res.status(404).json({message:"Intern not found"});
+        }
+        if(!intern.certificateIssued || !intern.certificateUrl){
+            return res.status(404).json({message:"No certificate issued for this intern"});
+        }
+        const filePath = path.join(process.cwd(), intern.certificateUrl);
+        if(!fs.existsSync(filePath)){
+            return res.status(404).json({message:"Certificate file not found on server"});
+        }
+        res.download(filePath, `certificate-${intern.name}.pdf`);
+    } catch (error) {
+        res.status(500).json({message:error.message});
     }
 };
 

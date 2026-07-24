@@ -28,6 +28,15 @@ const api = {
     if (!res.ok) throw new Error(data.message || "Request failed");
     return data;
   },
+  async uploadFile(path, formData) {
+    const headers = {};
+    if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
+    const opts = { method: "POST", headers, body: formData };
+    const res = await fetch(`${API_BASE}${path}`, opts);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Upload failed");
+    return data;
+  },
   get: (path) => api.request("GET", path),
   post: (path, body) => api.request("POST", path, body),
   put: (path, body) => api.request("PUT", path, body),
@@ -281,7 +290,10 @@ function renderInternTable() {
         <td>${intern.certificateIssued ? "Issued" : "Not issued"}</td>
         <td>
           <button class="action-btn edit-intern" data-id="${intern._id}">Edit</button>
-          ${!intern.certificateIssued ? `<button class="action-btn issue-certificate" data-id="${intern._id}">Issue Certificate</button>` : ""}
+          ${!intern.certificateIssued
+            ? `<button class="action-btn issue-certificate" data-id="${intern._id}">Issue Certificate</button>`
+            : `<button class="action-btn download-certificate" data-id="${intern._id}" data-url="${intern.certificateUrl || ''}">Download Certificate</button>`
+          }
           <button class="action-btn delete-intern" data-id="${intern._id}">Delete</button>
         </td>
       </tr>
@@ -719,9 +731,35 @@ function bindEvents() {
       }
 
       if (target.classList.contains("issue-certificate")) {
-        await api.patch(`/interns/${id}/certificate`, {});
-        addActivity(`Certificate issued for '${intern.name}'.`);
-        await refreshData();
+        const fileInput = document.getElementById("certFileInput");
+        fileInput.value = "";
+        fileInput.onchange = async () => {
+          const file = fileInput.files[0];
+          if (!file) return;
+          if (!file.name.toLowerCase().endsWith(".pdf")) {
+            alert("Only PDF files are allowed.");
+            return;
+          }
+          const formData = new FormData();
+          formData.append("certificate", file);
+          try {
+            await api.uploadFile(`/interns/${id}/certificate`, formData);
+            addActivity(`Certificate issued for '${intern.name}'.`);
+            await refreshData();
+          } catch (err) {
+            alert("Upload failed: " + err.message);
+          }
+        };
+        fileInput.click();
+      }
+
+      if (target.classList.contains("download-certificate")) {
+        const url = target.dataset.url;
+        if (url) {
+          window.open(`${API_BASE.replace("/api", "")}${url}`, "_blank");
+        } else {
+          window.open(`${API_BASE}/interns/${id}/certificate`, "_blank");
+        }
       }
 
       if (target.classList.contains("edit-intern")) {

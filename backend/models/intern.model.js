@@ -17,9 +17,7 @@ const internSchema = new mongoose.Schema({
     },
    
     certificateIssued: {type: Boolean, default: false},
-    
-
-
+    certificateUrl: {type: String, default: null},
     issueDate: Date,
     //Qualification
     highestQualification: String,
