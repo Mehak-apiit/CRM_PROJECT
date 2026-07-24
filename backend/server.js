@@ -12,7 +12,6 @@ import invoiceRoutes from "./routes/invoiceRoutes.js";
 import employeeRoutes from "./routes/employeeRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
 import seedUsers from "./utils/seed.js";
-import internRoutes from "./routes/intern.routes.js";
 import documentRoutes from "./routes/documentRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -27,6 +26,8 @@ app.use(cors({
     process.env.FRONTEND_URL,
     "http://localhost:5000",
     "http://localhost:3000",
+    "http://127.0.0.1:5500",
+    "http://127.0.0.1:5000",
   ],
   credentials: true,
 }));
@@ -53,8 +54,6 @@ app.use("/api/invoices", invoiceRoutes);
 app.use("/api/documents", documentRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/interns",internRoutes);
-app.use("/api/documents",documentRoutes);
 
 // SPA fallback - serve index.html for non-API routes.
 app.use((req, res, next) => {
