@@ -14,9 +14,8 @@ import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
  router.get("/", protect, getAllInterns);
  router.put("/:id", protect, authorizeRoles("admin", "superAdmin"), updateIntern);
  router.patch("/:id/status", protect, authorizeRoles("admin", "superAdmin"), updateInternsStatus);
-//  router.patch("/:id/certificate", protect, authorizeRoles("admin", "superAdmin"), issueCertificate);
+ router.patch("/:id/certificate", protect, authorizeRoles("admin", "superAdmin"), issueCertificate);
  router.delete("/:id", protect, authorizeRoles("admin", "superAdmin"), deleteIntern);
- router.post("/issue-certificate",protect, authorizeRoles("admin", "superAdmin"),issueCertificate)
  router.get("my-certificate",protect,getMyCertificate);
  export default router;
 

@@ -1,33 +1,38 @@
 import mongoose from "mongoose";
 const documentSchema = new mongoose.Schema({
-    documentType: {
+    name: {
         type: String,
-        enum: ["Aadhar","PAN","HighestQualification"],
-        required: true
+        required: true,
     },
-    fileUrl: String,
+    category: {
+        type: String,
+        enum: ["Resume", "Offer Letter", "Contract", "Certificate", "Invoices", "Contracts", "Identity Proofs"],
+        required: true,
+    },
+    linkedTo: {
+        type: String,
+        default: "",
+    },
+    uploader: {
+        type: String,
+        default: "",
+    },
+    fileUrl: {
+        type: String,
+        default: "",
+    },
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         refPath: "ownerModel",
-        required: true
     },
     ownerModel: {
-        type:String,
-        enum: ["Employee","Intern"],
-        required:true
+        type: String,
+        enum: ["Employee", "Intern"],
     },
-    ownerName: {
-        type:String,
-        required: true
+    uploadedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
     },
-    uploadedBy:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
-    }
+}, { timestamps: true });
 
-},{timestamps:true});
-documentSchema.index(
-    {owner:1,documentType:1},
-    {unique:true}
-);
-export default mongoose.model("Document",documentSchema);
+export default mongoose.model("Document", documentSchema);

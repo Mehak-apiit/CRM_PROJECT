@@ -599,46 +599,31 @@ function bindEvents() {
     openModal(
       "Upload Document",
       [
-        { 
-          label: "Upload Document", 
-          name: "file",
-          type: "file" 
-        },
         {
           label: "Document Name",
-          name: "documentname",
+          name: "name",
           type: "text"
         },
         {
-          label: "Document Type", 
-          name: "documentType", 
-          type: "select", 
-          options: 
-          ["Resume", "Offer Letter", "Contract", "Certificate"
-          ]
-        },
-        { 
-          label: "Owner Type", 
-          name: "ownerType", 
+          label: "Category",
+          name: "category",
           type: "select",
-          options: [
-            "Intern",
-            "Employee",
-            "Lead"
-          ]
+          options: ["Resume", "Offer Letter", "Contract", "Certificate", "Invoices", "Identity Proofs"]
         },
-        {  
-          label: "Select Intern",
-          name: "owner",
-          type: "select",
-          options: [
-            "Intern",
-            "Employee"
-          ]
+        {
+          label: "Linked To",
+          name: "linkedTo",
+          type: "text"
+        },
+        {
+          label: "Uploader",
+          name: "uploader",
+          type: "text",
+          value: state.currentUser?.name || ""
         }
       ],
       async (data) => {
-        await api.post("/documents/upload-metadata", data);
+        await api.post("/documents", data);
         addActivity(`Document '${data.name}' uploaded.`);
       }
     );
@@ -651,7 +636,7 @@ function bindEvents() {
       [
         { label: "Name", name: "name", type: "text" },
         { label: "Email", name: "email", type: "email" },
-        { label: "Password", name: "password", type: "text" },
+        { label: "Password", name: "password", type: "password" },
         { label: "Role", name: "role", type: "select", options: ["admin", "superAdmin"], value: "admin" },
         { label: "Status", name: "status", type: "select", options: ["Active", "Inactive"], value: "Active" },
       ],

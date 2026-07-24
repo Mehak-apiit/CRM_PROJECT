@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 const certificateSchema = new mongoose.Schema({
     internId:{
         type: mongoose.Schema.Types.ObjectId,
-        ref:"Inern",
+        ref:"Intern",
         required: true
     },
     certificateUrl:{

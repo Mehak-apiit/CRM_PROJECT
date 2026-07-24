@@ -16,7 +16,7 @@ const internSchema = new mongoose.Schema({
         default: "Ongoing"
     },
    
-    CertificateIssued: {type: Boolean, default: false},
+    certificateIssued: {type: Boolean, default: false},
     
 
 

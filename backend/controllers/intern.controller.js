@@ -11,24 +11,26 @@ export const createIntern = async (req, res) => {
             password,
             college,
             phone,
-            department
+            department,
+            highestQualification,
+            graduationYear,
+            internshipStatus,
         } = req.body;
-        const hashedPassword = await bcrypt.hash(password,10);
+        const hashedPassword = await bcrypt.hash(password || "intern123",10);
          const intern = await Intern.create({
             name,
             email,
             phone,
             college,
             department,
-            phone
-            
-
+            highestQualification,
+            graduationYear,
+            internshipStatus,
         });
         const user = await User.create({
             name,
             email,
             password:hashedPassword,
-            phone,
             role: "intern"
         })
         intern.userId = user._id;
@@ -86,20 +88,21 @@ export const updateInternsStatus = async (req, res) => {
 //Issue Certificate 
 export const issueCertificate = async(req,res)=>{
     try {
-        const {internId} = req.body;
-        const intern = await Intern.findById(internId);
+        const intern = await Intern.findById(req.params.id);
         if(!intern){
             return res.status(404).json({message:"Intern not found"});
-            // dummy test certificate
-            const certificate = await Certificate.create({
-                internId,
-                issuedBy: req.user.id,
-                certificateUrl:`Certificate_for_${intern.name}.pdf`
-            });
-            res.status(200).json({
-                message:"Certificate issued successfully",certificate
-            });
         }
+        intern.certificateIssued = true;
+        intern.issueDate = new Date();
+        await intern.save();
+        const certificate = await Certificate.create({
+            internId: intern._id,
+            issuedBy: req.user._id,
+            certificateUrl:`Certificate_for_${intern.name}.pdf`
+        });
+        res.status(200).json({
+            message:"Certificate issued successfully",certificate
+        });
     } catch (error) {
         res.status(500).json({message:error.message});
         
