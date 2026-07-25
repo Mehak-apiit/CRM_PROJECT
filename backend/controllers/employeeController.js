@@ -1,4 +1,6 @@
 import Employee from "../models/Employee.js";
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 
 // Create Employee
 export const createEmployee = async (req, res) => {
@@ -6,10 +8,20 @@ export const createEmployee = async (req, res) => {
     const {
       name,
       email,
+      password,
       role,
       joiningDate,
       status,
     } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password || "employee123", 10);
+
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: "employee",
+    });
 
     const employee = await Employee.create({
       name,
@@ -17,6 +29,7 @@ export const createEmployee = async (req, res) => {
       role: role || "employee",
       joiningDate: joiningDate || Date.now(),
       status: status || "Active",
+      userId: user._id,
     });
 
     res.status(201).json(employee);

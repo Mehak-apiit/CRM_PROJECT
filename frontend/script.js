@@ -24,7 +24,12 @@ const api = {
     const opts = { method, headers };
     if (body) opts.body = JSON.stringify(body);
     const res = await fetch(`${API_BASE}${path}`, opts);
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      throw new Error(`Server error (status ${res.status}). Please try again.`);
+    }
     if (!res.ok) throw new Error(data.message || "Request failed");
     return data;
   },
@@ -33,7 +38,12 @@ const api = {
     if (state.token) headers["Authorization"] = `Bearer ${state.token}`;
     const opts = { method, headers, body: formData };
     const res = await fetch(`${API_BASE}${path}`, opts);
-    const data = await res.json();
+    let data;
+    try {
+      data = await res.json();
+    } catch (e) {
+      throw new Error(`Server returned non-JSON response (status ${res.status}). Check if the file format is correct.`);
+    }
     if (!res.ok) throw new Error(data.message || "Upload failed");
     return data;
   },
@@ -92,7 +102,6 @@ const closeModalBtn = document.getElementById("closeModalBtn");
 const switchAccountBtn = document.getElementById("switchAccountBtn");
 const loginPageForm = document.getElementById("loginPageForm");
 const logoutBtn = document.getElementById("logoutBtn");
-const loginRole = document.getElementById("loginRole");
 
 const menuToggle = document.getElementById("menuToggle");
 const sidebar = document.getElementById("sidebar");
@@ -134,6 +143,9 @@ function getBadgeClass(status) {
 }
 
 function hasAccess(moduleName) {
+  if (state.role === "employee" || state.role === "intern") {
+    return moduleName === "dashboard" || moduleName === "documents";
+  }
   const adminBlocked = ["reports", "userManagement"];
   if (state.role === "admin") {
     return !adminBlocked.includes(moduleName);
@@ -464,19 +476,48 @@ function setupRoleBasedUI() {
   const restrictedUserNav = document.querySelector('.nav-btn[data-view="userManagement"]');
   const addEmployeeBtn = document.getElementById("addEmployeeBtn");
   const addDocumentBtn = document.getElementById("addDocumentBtn");
+  const rolePicker = document.querySelector(".role-picker");
+  const switchAccountBtnEl = document.getElementById("switchAccountBtn");
 
-  if (state.role === "admin") {
+  const allNavBtns = document.querySelectorAll(".nav-btn");
+
+  if (state.role === "employee" || state.role === "intern") {
+    allNavBtns.forEach((btn) => {
+      const view = btn.dataset.view;
+      if (view !== "dashboard" && view !== "documents") {
+        btn.style.display = "none";
+      } else {
+        btn.style.display = "block";
+      }
+    });
+    if (addEmployeeBtn) addEmployeeBtn.style.display = "none";
+    if (addDocumentBtn) addDocumentBtn.style.display = "none";
+    if (rolePicker) rolePicker.style.display = "none";
+    if (switchAccountBtnEl) switchAccountBtnEl.style.display = "none";
+    if (state.activeView !== "dashboard" && state.activeView !== "documents") switchView("dashboard");
+  } else if (state.role === "admin") {
+    allNavBtns.forEach((btn) => btn.style.display = "block");
     restrictedNav.style.display = "none";
     restrictedUserNav.style.display = "none";
-    addEmployeeBtn.disabled = true;
-    addDocumentBtn.disabled = false;
-    addEmployeeBtn.title = "Only Super Admin can add employees";
+    if (addEmployeeBtn) {
+      addEmployeeBtn.disabled = true;
+      addEmployeeBtn.title = "Only Super Admin can add employees";
+    }
+    if (addDocumentBtn) addDocumentBtn.disabled = false;
+    if (rolePicker) rolePicker.style.display = "none";
+    if (switchAccountBtnEl) switchAccountBtnEl.style.display = "none";
     if (state.activeView === "reports" || state.activeView === "userManagement") switchView("dashboard");
   } else {
+    allNavBtns.forEach((btn) => btn.style.display = "block");
     restrictedNav.style.display = "block";
     restrictedUserNav.style.display = "block";
-    addEmployeeBtn.disabled = false;
-    addEmployeeBtn.title = "";
+    if (addEmployeeBtn) {
+      addEmployeeBtn.disabled = false;
+      addEmployeeBtn.title = "";
+    }
+    if (addDocumentBtn) addDocumentBtn.disabled = false;
+    if (rolePicker) rolePicker.style.display = "none";
+    if (switchAccountBtnEl) switchAccountBtnEl.style.display = "block";
   }
 }
 
@@ -534,7 +575,6 @@ function bindEvents() {
 
   roleSelect.addEventListener("change", () => {
     state.role = roleSelect.value;
-    addActivity(`Role switched to ${state.role === "superAdmin" ? "Super Admin" : "Admin"}.`);
     renderAll();
   });
 
@@ -575,6 +615,7 @@ function bindEvents() {
       [
         { label: "Full Name", name: "name", type: "text" },
         { label: "Email", name: "email", type: "email" },
+        { label: "Password", name: "password", type: "password" },
         { label: "Role", name: "role", type: "text" },
         { label: "Joining Date", name: "joiningDate", type: "date" },
         { label: "Status", name: "status", type: "select", options: ["Active", "Inactive"], value: "Active" },
@@ -592,6 +633,7 @@ function bindEvents() {
       [
         { label: "Full Name", name: "name", type: "text" },
         { label: "Email", name: "email", type: "email" },
+        { label: "Password", name: "password", type: "password" },
         { label: "Phone", name: "phone", type: "text" },
         { label: "Department", name: "department", type: "text" },
         { label: "College", name: "college", type: "text" },
@@ -723,67 +765,73 @@ function bindEvents() {
     const intern = state.interns.find((item) => item._id === id);
     if (!id || !intern) return;
 
-    try {
-      if (target.classList.contains("delete-intern")) {
+    if (target.classList.contains("delete-intern")) {
+      try {
         await api.delete(`/interns/${id}`);
         addActivity(`Intern '${intern.name}' removed.`);
         await refreshData();
+      } catch (error) {
+        alert("Error: " + error.message);
       }
+      return;
+    }
 
-      if (target.classList.contains("issue-certificate")) {
-        const fileInput = document.getElementById("certFileInput");
-        fileInput.value = "";
-        fileInput.onchange = async () => {
-          const file = fileInput.files[0];
-          if (!file) return;
-          if (!file.name.toLowerCase().endsWith(".pdf")) {
-            alert("Only PDF files are allowed.");
-            return;
-          }
-          const formData = new FormData();
-          formData.append("certificate", file);
-          try {
-            await api.uploadFile("PATCH", `/interns/${id}/certificate`, formData);
-            addActivity(`Certificate issued for '${intern.name}'.`);
-            await refreshData();
-          } catch (err) {
-            alert("Upload failed: " + err.message);
-          }
-        };
-        fileInput.click();
-      }
-
-      if (target.classList.contains("download-certificate")) {
-        const url = target.dataset.url;
-        if (url) {
-          window.open(`${API_BASE.replace("/api", "")}${url}`, "_blank");
-        } else {
-          window.open(`${API_BASE}/interns/${id}/certificate`, "_blank");
+    if (target.classList.contains("issue-certificate")) {
+      const fileInput = document.getElementById("certFileInput");
+      fileInput.value = "";
+      const internIdForUpload = id;
+      const internNameForUpload = intern.name;
+      fileInput.onchange = async () => {
+        const file = fileInput.files[0];
+        if (!file) return;
+        if (!file.name.toLowerCase().endsWith(".pdf")) {
+          alert("Only PDF files are allowed.");
+          return;
         }
-      }
+        const formData = new FormData();
+        formData.append("certificate", file);
+        try {
+          await api.uploadFile("PATCH", `/interns/${internIdForUpload}/certificate`, formData);
+          addActivity(`Certificate issued for '${internNameForUpload}'.`);
+          await refreshData();
+        } catch (err) {
+          alert("Upload failed: " + err.message);
+        }
+      };
+      fileInput.click();
+      return;
+    }
 
-      if (target.classList.contains("edit-intern")) {
-        openModal(
-          "Edit Intern",
-          [
-            { label: "Full Name", name: "name", type: "text", value: intern.name },
-            { label: "Email", name: "email", type: "email", value: intern.email },
-            { label: "Phone", name: "phone", type: "text", value: intern.phone },
-            { label: "Department", name: "department", type: "text", value: intern.department },
-            { label: "College", name: "college", type: "text", value: intern.college },
-            { label: "Highest Qualification", name: "highestQualification", type: "text", value: intern.highestQualification },
-            { label: "Graduation Year", name: "graduationYear", type: "number", value: intern.graduationYear },
-            { label: "Internship Status", name: "internshipStatus", type: "select", options: ["Ongoing", "Completed", "Dropped"], value: intern.internshipStatus },
-          ],
-          async (data) => {
-            data.graduationYear = Number(data.graduationYear);
-            await api.put(`/interns/${id}`, data);
-            addActivity(`Intern '${data.name}' updated.`);
-          }
-        );
+    if (target.classList.contains("download-certificate")) {
+      const url = target.dataset.url;
+      if (url) {
+        window.open(`${API_BASE.replace("/api", "")}${url}`, "_blank");
+      } else {
+        window.open(`${API_BASE}/interns/${id}/certificate`, "_blank");
       }
-    } catch (error) {
-      alert("Error: " + error.message);
+      return;
+    }
+
+    if (target.classList.contains("edit-intern")) {
+      openModal(
+        "Edit Intern",
+        [
+          { label: "Full Name", name: "name", type: "text", value: intern.name },
+          { label: "Email", name: "email", type: "email", value: intern.email },
+          { label: "Phone", name: "phone", type: "text", value: intern.phone },
+          { label: "Department", name: "department", type: "text", value: intern.department },
+          { label: "College", name: "college", type: "text", value: intern.college },
+          { label: "Highest Qualification", name: "highestQualification", type: "text", value: intern.highestQualification },
+          { label: "Graduation Year", name: "graduationYear", type: "number", value: intern.graduationYear },
+          { label: "Internship Status", name: "internshipStatus", type: "select", options: ["Ongoing", "Completed", "Dropped"], value: intern.internshipStatus },
+        ],
+        async (data) => {
+          data.graduationYear = Number(data.graduationYear);
+          await api.put(`/interns/${id}`, data);
+          addActivity(`Intern '${data.name}' updated.`);
+        }
+      );
+      return;
     }
   });
 
@@ -847,15 +895,15 @@ function bindEvents() {
     event.preventDefault();
     const email = document.getElementById("loginEmail").value;
     const password = document.getElementById("loginPassword").value;
-    const role = loginRole.value;
 
     try {
       const data = await api.post("/auth/login", { email, password });
       state.token = data.token;
       state.currentUser = data;
-      state.role = data.role || role;
+      state.role = data.role;
       roleSelect.value = state.role;
-      addActivity(`User '${email}' logged in as ${state.role === "superAdmin" ? "Super Admin" : "Admin"}.`);
+      const roleLabel = state.role.charAt(0).toUpperCase() + state.role.slice(1).replace(/([A-Z])/g, " $1");
+      addActivity(`User '${data.name || email}' logged in as ${roleLabel}.`);
       await loadData();
       openDashboard();
       renderAll();

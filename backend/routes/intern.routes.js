@@ -14,6 +14,7 @@ import uploadCertificate from "../middleware/certUploadMiddleware.js";
 
 const router = express.Router();
 
+router.get("/my-certificate", protect, getMyCertificate);
 router.post("/", protect, authorizeRoles("admin", "superAdmin"), createIntern);
 router.get("/", protect, getAllInterns);
 router.put("/:id", protect, authorizeRoles("admin", "superAdmin"), updateIntern);
@@ -21,6 +22,5 @@ router.patch("/:id/status", protect, authorizeRoles("admin", "superAdmin"), upda
 router.patch("/:id/certificate", protect, authorizeRoles("admin", "superAdmin"), uploadCertificate.single("certificate"), issueCertificate);
 router.get("/:id/certificate", protect, downloadCertificate);
 router.delete("/:id", protect, authorizeRoles("admin", "superAdmin"), deleteIntern);
-router.get("/my-certificate", protect, getMyCertificate);
 
 export default router;

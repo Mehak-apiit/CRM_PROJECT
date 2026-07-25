@@ -110,9 +110,15 @@ app.use((req, res) => {
   }
 });
 
-// Global error handler
+// Global error handler — catches multer errors and all others, always returns JSON
 app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err.stack || err.message);
+  console.error("Error:", err.name, err.message);
+  if (err.code === "LIMIT_FILE_SIZE") {
+    return res.status(413).json({ message: "File too large. Maximum size is 5MB." });
+  }
+  if (err.message && err.message.includes("Only PDF")) {
+    return res.status(400).json({ message: err.message });
+  }
   res.status(err.status || 500).json({
     message: process.env.NODE_ENV === "production" ? "Internal server error" : err.message,
   });
