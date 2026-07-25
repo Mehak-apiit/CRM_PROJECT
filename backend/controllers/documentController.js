@@ -30,27 +30,16 @@ export const createDocumentMetadata = async (req, res) => {
 
 export const uploadDocument = async (req, res) => {
   try {
-    const { documentType, ownerId, ownerModel } = req.body;
+    const { name, category, linkedTo } = req.body;
     if (!req.file) {
       return res.status(400).json({ message: "Please upload a PDF file" });
     }
-    let ownerData;
-    if (ownerModel === "Employee") {
-      ownerData = await Employee.findById(new mongoose.Types.ObjectId(ownerId));
-    } else {
-      ownerData = await Intern.findById(new mongoose.Types.ObjectId(ownerId));
-    }
-    if (!ownerData) {
-      return res.status(400).json({ message: "Owner not found" });
-    }
     const doc = await Document.create({
-      name: req.file.originalname,
-      category: documentType || "Contract",
-      linkedTo: ownerData.name,
+      name: name || req.file.originalname,
+      category: category || "Aadhar Card",
+      linkedTo: linkedTo || "",
       uploader: req.user.name || "",
       fileUrl: req.file.path,
-      owner: ownerId,
-      ownerModel,
       uploadedBy: req.user._id,
     });
     res.status(201).json(doc);

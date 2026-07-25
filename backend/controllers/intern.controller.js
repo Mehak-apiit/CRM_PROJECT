@@ -2,6 +2,7 @@ import Intern from "../models/intern.model.js";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import Certificate from "../models/certificate.model.js";
+import Document from "../models/Document.js";
 import path from "path";
 import fs from "fs";
 //Create Intern
@@ -107,6 +108,18 @@ export const issueCertificate = async(req,res)=>{
             issuedBy: req.user._id,
             certificateUrl: certPath
         });
+
+        await Document.create({
+            name: `Internship Certificate - ${intern.name}`,
+            category: "Internship Certificate",
+            linkedTo: intern.name,
+            uploader: req.user.name || "",
+            fileUrl: certPath,
+            owner: intern._id,
+            ownerModel: "Intern",
+            uploadedBy: req.user._id,
+        });
+
         res.status(200).json({
             message:"Certificate issued successfully",
             certificate,
@@ -150,8 +163,12 @@ export const deleteIntern = async (req, res) => {
 // Get my certificate
 export const getMyCertificate = async(req,res)=>{
     try {
+        const intern = await Intern.findOne({ userId: req.user._id });
+        if(!intern){
+            return res.status(404).json({message:"Intern profile not found"});
+        }
         const certificate = await Certificate.find({
-            internId:req.user.id
+            internId: intern._id
         });
         res.status(200).json(certificate);
     } catch (error) {

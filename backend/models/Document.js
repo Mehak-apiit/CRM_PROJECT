@@ -6,7 +6,7 @@ const documentSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        enum: ["Resume", "Offer Letter", "Contract", "Certificate", "Invoices", "Contracts", "Identity Proofs"],
+        enum: ["Aadhar Card", "PAN Card", "Highest Qualification", "Internship Certificate"],
         required: true,
     },
     linkedTo: {

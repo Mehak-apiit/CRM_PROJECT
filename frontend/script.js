@@ -344,15 +344,16 @@ function renderDocumentFilters() {
 
 function renderDocumentStats() {
   const total = state.documents.length;
-  const invoices = state.documents.filter((doc) => doc.category === "Invoices").length;
-  const contracts = state.documents.filter((doc) => doc.category === "Contracts").length;
-  const identity = state.documents.filter((doc) => doc.category === "Identity Proofs").length;
+  const aadhar = state.documents.filter((doc) => doc.category === "Aadhar Card").length;
+  const pan = state.documents.filter((doc) => doc.category === "PAN Card").length;
+  const qualification = state.documents.filter((doc) => doc.category === "Highest Qualification").length;
+  const certificate = state.documents.filter((doc) => doc.category === "Internship Certificate").length;
 
   documentStatsGrid.innerHTML = `
     <div class="doc-stat total"><small>Total Documents</small><strong>${total}</strong></div>
-    <div class="doc-stat invoices"><small>Invoices</small><strong>${invoices}</strong></div>
-    <div class="doc-stat contracts"><small>Contracts</small><strong>${contracts}</strong></div>
-    <div class="doc-stat identity"><small>ID Proofs</small><strong>${identity}</strong></div>
+    <div class="doc-stat identity"><small>Aadhar Cards</small><strong>${aadhar}</strong></div>
+    <div class="doc-stat contracts"><small>PAN Cards</small><strong>${pan}</strong></div>
+    <div class="doc-stat invoices"><small>Certificates</small><strong>${certificate}</strong></div>
   `;
 }
 
@@ -361,16 +362,20 @@ function renderDocumentCards() {
   documentGrid.innerHTML = docs
     .map((doc) => {
       const categoryClass = getCategoryClass(doc.category);
+      const displayName = doc.name || "Untitled Document";
+      const displayCategory = doc.category || "Uncategorized";
+      const fileUrl = doc.fileUrl || "";
       return `
       <article class="document-item">
         <div class="document-item-head">
           <span class="document-icon">📄</span>
           <div class="document-actions">
+            ${fileUrl ? `<a class="doc-mini-btn" href="${API_BASE.replace('/api', '')}${fileUrl}" target="_blank" title="View PDF">⬇</a>` : ""}
             <button class="doc-mini-btn delete delete-document" title="Delete" data-id="${doc._id}">🗑</button>
           </div>
         </div>
-        <h4 class="document-title">${doc.name}</h4>
-        <p class="doc-category"><span class="doc-chip ${categoryClass}">${doc.category}</span></p>
+        <h4 class="document-title">${displayName}</h4>
+        <p class="doc-category"><span class="doc-chip ${categoryClass}">${displayCategory}</span></p>
         <p class="doc-meta">
           Linked: ${doc.linkedTo || "N/A"}<br />
           Uploaded: ${doc.createdAt ? new Date(doc.createdAt).toLocaleString("en-IN") : "N/A"}<br />
@@ -434,6 +439,9 @@ function openModal(title, fields, submitHandler) {
         return `<label>${field.label}<select name="${field.name}" required>${field.options
           .map((option) => `<option value="${option}" ${option === field.value ? "selected" : ""}>${option}</option>`)
           .join("")}</select></label>`;
+      }
+      if (field.type === "file") {
+        return `<label>${field.label}<input type="file" name="${field.name}" accept="${field.accept || "*"}" ${field.required !== false ? "required" : ""} /></label>`;
       }
       return `<label>${field.label}<input type="${field.type}" name="${field.name}" required value="${field.value || ""}" /></label>`;
     })
@@ -650,35 +658,46 @@ function bindEvents() {
   });
 
   document.getElementById("addDocumentBtn").addEventListener("click", () => {
+    const allPeople = [
+      ...state.interns.map((i) => ({ label: `Intern: ${i.name}`, value: i.name })),
+      ...state.employees.map((e) => ({ label: `Employee: ${e.name}`, value: e.name })),
+    ];
+    const linkedOptions = allPeople.length
+      ? allPeople.map((p) => p.value)
+      : ["N/A"];
+
     openModal(
       "Upload Document",
       [
-        {
-          label: "Document Name",
-          name: "name",
-          type: "text"
-        },
+        { label: "Document Name", name: "name", type: "text" },
         {
           label: "Category",
           name: "category",
           type: "select",
-          options: ["Resume", "Offer Letter", "Contract", "Certificate", "Invoices", "Identity Proofs"]
+          options: ["Aadhar Card", "PAN Card", "Highest Qualification", "Internship Certificate"],
         },
         {
           label: "Linked To",
           name: "linkedTo",
-          type: "text"
+          type: "select",
+          options: linkedOptions,
         },
         {
-          label: "Uploader",
-          name: "uploader",
-          type: "text",
-          value: state.currentUser?.name || ""
-        }
+          label: "Upload PDF",
+          name: "file",
+          type: "file",
+          accept: "application/pdf",
+          required: true,
+        },
       ],
       async (data) => {
-        await api.post("/documents", data);
-        addActivity(`Document '${data.name}' uploaded.`);
+        const formData = new FormData();
+        formData.append("name", data.name);
+        formData.append("category", data.category);
+        formData.append("linkedTo", data.linkedTo);
+        formData.append("file", dynamicForm.querySelector('input[name="file"]').files[0]);
+        await api.uploadFile("POST", "/documents/upload", formData);
+        addActivity(`Document '${data.name}' uploaded to vault.`);
       }
     );
   });
