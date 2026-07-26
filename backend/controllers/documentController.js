@@ -2,6 +2,8 @@ import Document from "../models/Document.js";
 import Employee from "../models/Employee.js";
 import Intern from "../models/intern.model.js";
 import mongoose from "mongoose";
+import fs from "fs";
+import path from "path";
 
 export const getAllDocuments = async (req, res) => {
   try {
@@ -50,6 +52,24 @@ export const uploadDocument = async (req, res) => {
 
 export const deleteDocument = async (req, res) => {
   try {
+    const doc = await Document.findById(req.params.id);
+    if (!doc) return res.status(404).json({ message: "Document not found" });
+
+    if (doc.category === "Internship Certificate" && doc.linkedTo) {
+      const intern = await Intern.findOne({ name: doc.linkedTo });
+      if (intern) {
+        intern.certificateIssued = false;
+        intern.certificateUrl = null;
+        intern.issueDate = null;
+        await intern.save();
+      }
+    }
+
+    if (doc.fileUrl) {
+      const filePath = path.join(process.cwd(), doc.fileUrl);
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+    }
+
     await Document.findByIdAndDelete(req.params.id);
     res.json({ message: "Document deleted" });
   } catch (error) {
