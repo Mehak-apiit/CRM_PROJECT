@@ -401,7 +401,7 @@ input {
 
 .document-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: 1fr;
   gap: 0.75rem;
 }
 
@@ -491,6 +491,113 @@ input {
   border-radius: 10px;
   padding: 1rem;
   color: var(--muted);
+}
+
+.person-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.person-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.8rem 1rem;
+  background: linear-gradient(135deg, #1e3a8a, #1e40af);
+  color: #fff;
+}
+
+.person-name {
+  margin: 0;
+  font-size: 1rem;
+  color: #fff;
+}
+
+.person-card-head .doc-chip.intern {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  margin-left: 0.4rem;
+}
+
+.person-card-head .doc-chip.employee {
+  background: rgba(255, 255, 255, 0.2);
+  color: #fff;
+  margin-left: 0.4rem;
+}
+
+.person-doc-count {
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+
+.person-docs {
+  padding: 0.5rem 1rem 0.8rem;
+}
+
+.person-doc-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  flex-wrap: wrap;
+}
+
+.person-doc-row:last-child {
+  border-bottom: none;
+}
+
+.doc-meta-inline {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  flex: 1;
+}
+
+.doc-row-actions {
+  display: flex;
+  gap: 0.3rem;
+}
+
+.doc-action-btn {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+  cursor: pointer;
+  color: #1e3a8a;
+  text-decoration: none;
+}
+
+.doc-action-btn:hover {
+  background: #f1f5f9;
+}
+
+.doc-delete-btn {
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+.doc-chip.aadhar-card {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.doc-chip.pan-card {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.doc-chip.highest-qualification {
+  background: #ede9fe;
+  color: #5b21b6;
+}
+
+.doc-chip.internship-certificate {
+  background: #dcfce7;
+  color: #166534;
 }
 
 .user-management-wrap {
@@ -693,7 +800,7 @@ td {
   }
 
   .document-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: 1fr;
   }
 }
 

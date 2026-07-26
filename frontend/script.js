@@ -316,15 +316,33 @@ function renderInternTable() {
 function getFilteredDocuments() {
   const query = documentSearch.value.trim().toLowerCase();
   const category = documentCategoryFilter.value;
-  return state.documents.filter((doc) => {
+
+  const filtered = state.documents.filter((doc) => {
     const matchesCategory = category === "all" || doc.category === category;
     const matchesQuery =
       !query ||
-      (doc.name && doc.name.toLowerCase().includes(query)) ||
       (doc.linkedTo && doc.linkedTo.toLowerCase().includes(query)) ||
+      (doc.name && doc.name.toLowerCase().includes(query)) ||
       (doc.uploader && doc.uploader.toLowerCase().includes(query));
     return matchesCategory && matchesQuery;
   });
+
+  const grouped = {};
+  filtered.forEach((doc) => {
+    const person = doc.linkedTo || "Unlinked";
+    if (!grouped[person]) grouped[person] = [];
+    grouped[person].push(doc);
+  });
+
+  return grouped;
+}
+
+function getPersonRole(name) {
+  const intern = state.interns.find((i) => i.name === name);
+  if (intern) return "Intern";
+  const emp = state.employees.find((e) => e.name === name);
+  if (emp) return "Employee";
+  return "";
 }
 
 function getCategoryClass(category) {
@@ -358,35 +376,58 @@ function renderDocumentStats() {
 }
 
 function renderDocumentCards() {
-  const docs = getFilteredDocuments();
-  documentGrid.innerHTML = docs
-    .map((doc) => {
-      const categoryClass = getCategoryClass(doc.category);
-      const displayName = doc.name || "Untitled Document";
-      const displayCategory = doc.category || "Uncategorized";
-      const fileUrl = doc.fileUrl || "";
+  const grouped = getFilteredDocuments();
+  const people = Object.keys(grouped).sort();
+
+  if (people.length === 0) {
+    documentGrid.innerHTML = "";
+    documentEmptyState.classList.remove("hidden");
+    return;
+  }
+  documentEmptyState.classList.add("hidden");
+
+  const categoryOrder = ["Aadhar Card", "PAN Card", "Highest Qualification", "Internship Certificate"];
+
+  documentGrid.innerHTML = people
+    .map((person) => {
+      const docs = grouped[person];
+      const role = getPersonRole(person);
+      const roleBadge = role ? `<span class="doc-chip ${role.toLowerCase()}">${role}</span>` : "";
+
+      const docList = categoryOrder
+        .filter((cat) => docs.some((d) => d.category === cat))
+        .map((cat) => {
+          const doc = docs.find((d) => d.category === cat);
+          const fileUrl = doc.fileUrl || "";
+          const viewUrl = fileUrl ? `${API_BASE.replace("/api", "")}${fileUrl}` : "";
+          return `
+            <div class="person-doc-row">
+              <span class="doc-chip ${getCategoryClass(cat)}">${cat}</span>
+              <span class="doc-meta-inline">By ${doc.uploader || "N/A"} &middot; ${doc.createdAt ? new Date(doc.createdAt).toLocaleDateString("en-IN") : "N/A"}</span>
+              <div class="doc-row-actions">
+                ${viewUrl ? `<a class="doc-action-btn" href="${viewUrl}" target="_blank" title="View PDF">View</a>` : ""}
+                ${viewUrl ? `<a class="doc-action-btn" href="${viewUrl}" download title="Download PDF">Download</a>` : ""}
+                <button class="doc-action-btn doc-delete-btn" data-id="${doc._id}" title="Delete">Delete</button>
+              </div>
+            </div>
+          `;
+        })
+        .join("");
+
       return `
-      <article class="document-item">
-        <div class="document-item-head">
-          <span class="document-icon">📄</span>
-          <div class="document-actions">
-            ${fileUrl ? `<a class="doc-mini-btn" href="${API_BASE.replace('/api', '')}${fileUrl}" target="_blank" title="View PDF">⬇</a>` : ""}
-            <button class="doc-mini-btn delete delete-document" title="Delete" data-id="${doc._id}">🗑</button>
+        <article class="person-card">
+          <div class="person-card-head">
+            <div>
+              <h4 class="person-name">${person}</h4>
+              ${roleBadge}
+            </div>
+            <span class="person-doc-count">${docs.length} doc${docs.length > 1 ? "s" : ""}</span>
           </div>
-        </div>
-        <h4 class="document-title">${displayName}</h4>
-        <p class="doc-category"><span class="doc-chip ${categoryClass}">${displayCategory}</span></p>
-        <p class="doc-meta">
-          Linked: ${doc.linkedTo || "N/A"}<br />
-          Uploaded: ${doc.createdAt ? new Date(doc.createdAt).toLocaleString("en-IN") : "N/A"}<br />
-          By: ${doc.uploader || "N/A"}
-        </p>
-      </article>
-    `;
+          <div class="person-docs">${docList}</div>
+        </article>
+      `;
     })
     .join("");
-
-  documentEmptyState.classList.toggle("hidden", docs.length > 0);
 }
 
 function renderUserManagement() {
@@ -857,7 +898,7 @@ function bindEvents() {
   documentGrid.addEventListener("click", async (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) return;
-    if (!target.classList.contains("delete-document")) return;
+    if (!target.classList.contains("doc-delete-btn")) return;
     const id = target.dataset.id;
     const doc = state.documents.find((item) => item._id === id);
     await api.delete(`/documents/${id}`);
