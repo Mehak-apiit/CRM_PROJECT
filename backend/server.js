@@ -17,6 +17,7 @@ import userRoutes from "./routes/userRoutes.js";
 import seedUsers from "./utils/seed.js";
 import internRoutes from "./routes/intern.routes.js";
 import documentRoutes from "./routes/documentRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -95,6 +96,7 @@ app.use("/api/documents", documentRoutes);
 app.use("/api/employees", employeeRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/interns", internRoutes);
+app.use("/api/admin", adminRoutes);
 
 // 404 for unknown API routes
 app.use("/api", (req, res) => {
