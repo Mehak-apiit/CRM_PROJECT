@@ -12,7 +12,7 @@ const generateToken =(id)=>{
 //Register
 export const registerUser = async(req,res)=>{
     try {
-        const {name,email,password,role}=req.body;
+        const {name,email,password}=req.body;
         //check if user exist or not
         const userExists = await User.findOne({email});
         if(userExists){
@@ -26,7 +26,7 @@ export const registerUser = async(req,res)=>{
             name,
             email,
             password: hashedPassword,
-            role: role || "admin"
+            role:"admin"
         });
         res.status(201).json({
             _id: user._id,

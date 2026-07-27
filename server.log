@@ -1,0 +1,3 @@
+◇ injected env (4) from .env // tip: ⌘ suppress logs { quiet: true }
+Server running on port 5000
+MongoDB Connected: ac-f0ra1vi-shard-00-00.pqr08i9.mongodb.net
