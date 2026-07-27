@@ -5,7 +5,7 @@ import {
     updateIntern,
     updateInternsStatus,
     issueCertificate,
-    downloadCertificate,
+    downloadMyCertificate,
     getMyCertificate,
     deleteIntern
 } from "../controllers/intern.controller.js";
@@ -25,11 +25,12 @@ router.get("/", protect, getAllInterns);
 router.put("/:id", protect, authorizeRoles("admin", "superAdmin"), updateIntern);
 router.patch("/:id/status", protect, authorizeRoles("admin", "superAdmin"), updateInternsStatus);
 router.patch("/:id/certificate", protect, authorizeRoles("admin", "superAdmin"), uploadCertificate.single("certificate"), issueCertificate);
+
 router.get(
-"/:id/certificate",
-protect,
-authorizeRoles("admin","superAdmin","intern"),
-downloadCertificate
+    "/my-certificate/download",
+    protect,
+    authorizeRoles("intern"),
+    downloadMyCertificate
 );
 
 router.delete("/:id", protect, authorizeRoles("admin", "superAdmin"), deleteIntern);

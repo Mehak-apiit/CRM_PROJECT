@@ -126,22 +126,60 @@ export const issueCertificate = async (req, res) => {
 };
 
 // Download Certificate
-export const downloadCertificate = async (req, res) => {
+export const downloadMyCertificate = async(req,res)=>{
     try {
-        const intern = await Intern.findById(req.params.id);
-        if (!intern) {
-            return res.status(404).json({ message: "Intern not found" });
+
+        // Find logged in intern
+        const intern = await Intern.findOne({
+            userId:req.user._id
+        });
+
+
+        if(!intern){
+            return res.status(404).json({
+                message:"Intern profile not found"
+            });
         }
-        if (!intern.certificateIssued || !intern.certificateUrl) {
-            return res.status(404).json({ message: "No certificate issued for this intern" });
+
+
+        // Find certificate
+        const certificate = await Certificate.findOne({
+            internId:intern._id
+        });
+
+
+        if(!certificate){
+            return res.status(404).json({
+                message:"Certificate not issued yet"
+            });
         }
-        const filePath = path.join(process.cwd(), intern.certificateUrl);
-        if (!fs.existsSync(filePath)) {
-            return res.status(404).json({ message: "Certificate file not found on server" });
+
+
+        const filePath = path.join(
+            process.cwd(),
+            certificate.certificateUrl
+        );
+
+
+        if(!fs.existsSync(filePath)){
+            return res.status(404).json({
+                message:"Certificate file not found"
+            });
         }
-        res.download(filePath, `certificate-${intern.name}.pdf`);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+
+
+        res.download(
+            filePath,
+            `Internship-Certificate-${intern.name}.pdf`
+        );
+
+
+    } catch(error){
+
+        res.status(500).json({
+            message:error.message
+        });
+
     }
 };
 
