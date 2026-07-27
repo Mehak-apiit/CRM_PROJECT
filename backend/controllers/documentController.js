@@ -32,17 +32,29 @@ export const createDocumentMetadata = async (req, res) => {
 
 export const uploadDocument = async (req, res) => {
   try {
-    const { name, category, linkedTo } = req.body;
+    const {
+      name,
+      category,
+      owner,
+      ownerModel
+    } = req.body;
     if (!req.file) {
       return res.status(400).json({ message: "Please upload a PDF file" });
     }
     const doc = await Document.create({
+
       name: name || req.file.originalname,
-      category: category || "Aadhar Card",
-      linkedTo: linkedTo || "",
-      uploader: req.user.name || "",
+
+      category,
+
+      owner,
+
+      ownerModel,
+
       fileUrl: req.file.path,
-      uploadedBy: req.user._id,
+
+      uploadedBy: req.user._id
+
     });
     res.status(201).json(doc);
   } catch (error) {
@@ -93,7 +105,10 @@ export const getMyDocuments = async (req, res) => {
       ownerId = intern._id;
       ownerModel = "Intern";
     }
-    const docs = await Document.find({ owner: ownerId, ownerModel });
+    const docs = await Document.find({
+      owner: ownerId,
+      ownerModel: ownerModel
+    });
     res.json(docs);
   } catch (error) {
     res.status(500).json({ message: error.message });

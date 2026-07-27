@@ -1,20 +1,25 @@
 import mongoose from "mongoose";
 const certificateSchema = new mongoose.Schema({
-    internId:{
+    internId: {
         type: mongoose.Schema.Types.ObjectId,
-        ref:"Intern",
+        ref: "Intern",
         required: true
     },
-    certificateUrl:{
-        type:String
+    certificateUrl: {
+        type: String
     },
-    issuedAt:{
-        type:Date,
-        default:Date.now
+    status: {
+        type: String,
+        enum: ["Issued", "Revoked"],
+        default: "Issued"
     },
-    issuedBy:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
+    issuedAt: {
+        type: Date,
+        default: Date.now
+    },
+    issuedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
     }
 });
-export default mongoose.model("Certificate",certificateSchema);
+export default mongoose.model("Certificate", certificateSchema);

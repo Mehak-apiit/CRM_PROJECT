@@ -19,8 +19,8 @@ export const createIntern = async (req, res) => {
             graduationYear,
             internshipStatus,
         } = req.body;
-        const hashedPassword = await bcrypt.hash(password || "intern123",10);
-         const intern = await Intern.create({
+        const hashedPassword = await bcrypt.hash(password || "intern123", 10);
+        const intern = await Intern.create({
             name,
             email,
             phone,
@@ -33,13 +33,13 @@ export const createIntern = async (req, res) => {
         const user = await User.create({
             name,
             email,
-            password:hashedPassword,
+            password: hashedPassword,
             role: "intern"
         })
         intern.userId = user._id;
         await intern.save();
-       
-        
+
+
         res.status(201).json({
             message: "Intern created successfully",
             intern
@@ -84,25 +84,22 @@ export const updateInternsStatus = async (req, res) => {
         if (!intern) return res.status(404).json({ message: "Intern not found" });
         res.json(intern);
     } catch (err) {
-        res.status(500).json({message:err.message});
+        res.status(500).json({ message: err.message });
 
     }
 };
 //Issue Certificate 
-export const issueCertificate = async(req,res)=>{
+export const issueCertificate = async (req, res) => {
     try {
-        if(!req.file){
-            return res.status(400).json({message:"Please upload a PDF certificate file"});
+        if (!req.file) {
+            return res.status(400).json({ message: "Please upload a PDF certificate file" });
         }
         const intern = await Intern.findById(req.params.id);
-        if(!intern){
-            return res.status(404).json({message:"Intern not found"});
+        if (!intern) {
+            return res.status(404).json({ message: "Intern not found" });
         }
         const certPath = `/uploads/certificates/${req.file.filename}`;
-        intern.certificateIssued = true;
-        intern.certificateUrl = certPath;
-        intern.issueDate = new Date();
-        await intern.save();
+
         const certificate = await Certificate.create({
             internId: intern._id,
             issuedBy: req.user._id,
@@ -112,8 +109,6 @@ export const issueCertificate = async(req,res)=>{
         await Document.create({
             name: `Internship Certificate - ${intern.name}`,
             category: "Internship Certificate",
-            linkedTo: intern.name,
-            uploader: req.user.name || "",
             fileUrl: certPath,
             owner: intern._id,
             ownerModel: "Intern",
@@ -121,32 +116,32 @@ export const issueCertificate = async(req,res)=>{
         });
 
         res.status(200).json({
-            message:"Certificate issued successfully",
+            message: "Certificate issued successfully",
             certificate,
             certificateUrl: certPath
         });
     } catch (error) {
-        res.status(500).json({message:error.message});
+        res.status(500).json({ message: error.message });
     }
 };
 
 // Download Certificate
-export const downloadCertificate = async(req,res)=>{
+export const downloadCertificate = async (req, res) => {
     try {
         const intern = await Intern.findById(req.params.id);
-        if(!intern){
-            return res.status(404).json({message:"Intern not found"});
+        if (!intern) {
+            return res.status(404).json({ message: "Intern not found" });
         }
-        if(!intern.certificateIssued || !intern.certificateUrl){
-            return res.status(404).json({message:"No certificate issued for this intern"});
+        if (!intern.certificateIssued || !intern.certificateUrl) {
+            return res.status(404).json({ message: "No certificate issued for this intern" });
         }
         const filePath = path.join(process.cwd(), intern.certificateUrl);
-        if(!fs.existsSync(filePath)){
-            return res.status(404).json({message:"Certificate file not found on server"});
+        if (!fs.existsSync(filePath)) {
+            return res.status(404).json({ message: "Certificate file not found on server" });
         }
         res.download(filePath, `certificate-${intern.name}.pdf`);
     } catch (error) {
-        res.status(500).json({message:error.message});
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -161,18 +156,44 @@ export const deleteIntern = async (req, res) => {
 };
 
 // Get my certificate
+
 export const getMyCertificate = async(req,res)=>{
     try {
-        const intern = await Intern.findOne({ userId: req.user._id });
-        if(!intern){
-            return res.status(404).json({message:"Intern profile not found"});
-        }
-        const certificate = await Certificate.find({
-            internId: intern._id
+
+        // 1. Find logged in intern
+        const intern = await Intern.findOne({
+            userId:req.user._id
         });
+
+
+        if(!intern){
+            return res.status(404).json({
+                message:"Intern profile not found"
+            });
+        }
+
+
+        // 2. Find certificate of this intern
+        const certificate = await Certificate.find({
+            internId:intern._id
+        });
+
+
+        if(!certificate.length){
+            return res.status(404).json({
+                message:"Certificate not issued yet"
+            });
+        }
+
+
         res.status(200).json(certificate);
-    } catch (error) {
-        res.status(500).json({message:error.message});
-        
+
+
+    } catch(error){
+
+        res.status(500).json({
+            message:error.message
+        });
+
     }
 };
