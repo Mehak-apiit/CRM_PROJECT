@@ -1,54 +1,32 @@
 import mongoose from "mongoose";
-const documentSchema = new mongoose.Schema({
 
-    name:{
-        type:String,
-        required:true,
+const documentSchema = new mongoose.Schema(
+  {
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      required: true,
+      refPath: "ownerModel"
     },
-
-
-    category:{
-        type:String,
-        enum:[
-            "Aadhar Card",
-            "PAN Card",
-            "Highest Qualification",
-            "Internship Certificate"
-        ],
-        required:true,
+    ownerModel: {
+      type: String,
+      required: true,
+      enum: ["Intern", "Employee"]
     },
-
-
-    fileUrl:{
-        type:String,
-        required:true,
+    documentType: {
+      type: String,
+      required: true,
+      enum: ["aadhaar", "pan", "qualification"]
     },
-
-
-    owner:{
-        type:mongoose.Schema.Types.ObjectId,
-        refPath:"ownerModel",
-        required:true
+    documentUrl: {
+      type: String,
+      required: true
     },
-
-
-    ownerModel:{
-        type:String,
-        enum:[
-            "Employee",
-            "Intern"
-        ],
-        required:true
-    },
-
-
-    uploadedBy:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User",
-        required:true
+    uploadedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User"
     }
-
-
-},{timestamps:true});
+  },
+  { timestamps: true }
+);
 
 export default mongoose.model("Document", documentSchema);
