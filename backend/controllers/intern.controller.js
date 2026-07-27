@@ -195,43 +195,41 @@ export const deleteIntern = async (req, res) => {
 
 // Get my certificate
 
-export const getMyCertificate = async(req,res)=>{
-    try {
-
-        // 1. Find logged in intern
-        const intern = await Intern.findOne({
-            userId:req.user._id
-        });
 
 
-        if(!intern){
-            return res.status(404).json({
-                message:"Intern profile not found"
-            });
-        }
+export const getMyCertificate = async (req, res) => {
+  try {
+    // 1. Find intern
+    const intern = await Intern.findOne({
+      userId: req.user._id
+    });
 
-
-        // 2. Find certificate of this intern
-        const certificate = await Certificate.find({
-            internId:intern._id
-        });
-
-
-        if(!certificate.length){
-            return res.status(404).json({
-                message:"Certificate not issued yet"
-            });
-        }
-
-
-        res.status(200).json(certificate);
-
-
-    } catch(error){
-
-        res.status(500).json({
-            message:error.message
-        });
-
+    if (!intern) {
+      return res.status(404).json({ message: "Intern not found" });
     }
+
+    // 2. Find certificate
+    const certificate = await Certificate.findOne({
+      internId: intern._id
+    });
+
+    if (!certificate) {
+      return res.status(404).json({ message: "Certificate not found" });
+    }
+
+    // 3. File path
+    const filePath = path.resolve(certificate.certificateUrl);
+
+    // 4. Check file exists
+    if (!fs.existsSync(filePath)) {
+      return res.status(404).json({ message: "File not found on server" });
+    }
+
+    // 5. Force download
+    res.download(filePath, "certificate.pdf");
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server error" });
+  }
 };
