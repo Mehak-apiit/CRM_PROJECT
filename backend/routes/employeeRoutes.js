@@ -5,7 +5,7 @@ import {
   getMyProfile
 } from "../controllers/employee.controller.js";
 
-import { protect, authorize } from "../middlewares/auth.middleware.js";
+import { protect, authorizeRoles } from "../middleware/authMiddleware.js";
 
 const router = express.Router();
 
@@ -14,14 +14,14 @@ const router = express.Router();
 router.post(
   "/",
   protect,
-  authorize("admin", "superAdmin"),
+  authorizeRoles("admin", "superAdmin"),
   createEmployee
 );
 
 router.get(
   "/",
   protect,
-  authorize("admin", "superAdmin"),
+  authorizeRoles("admin", "superAdmin"),
   getAllEmployees
 );
 
@@ -30,7 +30,7 @@ router.get(
 router.get(
   "/me",
   protect,
-  authorize("employee"),
+  authorizeRoles("employee"),
   getMyProfile
 );
 
