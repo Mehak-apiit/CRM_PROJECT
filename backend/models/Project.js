@@ -8,10 +8,10 @@ const projectSchema = new mongoose.Schema({
         type:String,
         required:true
     },
-    team: [{
-        type:mongoose.Schema.Types.ObjectId,ref:"User"
-
-    }],
+    team: {
+        type: String,
+        default: ""
+    },
     status:{
         type:String,
         enum:["active","completed"],

@@ -12,7 +12,7 @@ export const createProject = async(req,res)=>{
 //Get all projects
 export const getProjects = async(req,res)=>{
     try{
-        const projects = await Project.find().populate("team");
+        const projects = await Project.find();
         res.json(projects);
     }
     catch(error){

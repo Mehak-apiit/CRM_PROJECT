@@ -12,7 +12,7 @@ export const getAllDocuments = async (req, res) => {
       return res.status(403).json({ message: "Access denied" });
     }
 
-    const docs = await Document.find().sort({ createdAt: -1 });
+    const docs = await Document.find().sort({ createdAt: -1 }).populate("owner");
 
     res.status(200).json({
       count: docs.length,
@@ -53,11 +53,10 @@ export const uploadDocument = async (req, res) => {
     }
 
     const doc = await Document.create({
-      name: req.file.originalname,
-      category,
+      documentType: category || "qualification",
+      documentUrl: req.file.path,
       owner,
       ownerModel,
-      fileUrl: req.file.path,
       uploadedBy: req.user._id
     });
 
@@ -105,7 +104,7 @@ export const getMyDocuments = async (req, res) => {
     const docs = await Document.find({
       owner: ownerId,
       ownerModel: ownerModel
-    }).sort({ createdAt: -1 });
+    }).sort({ createdAt: -1 }).populate("owner");
 
     res.status(200).json({
       count: docs.length,

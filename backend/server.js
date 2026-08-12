@@ -80,8 +80,9 @@ const start = async () => {
 };
 start();
 
-// Serve frontend static files
+// Serve frontend static files (legacy + React)
 app.use(express.static(path.join(__dirname, "../frontend")));
+app.use(express.static(path.join(__dirname, "../frontend-react/dist")));
 
 // Serve uploads
 app.use("/uploads", express.static(uploadsDir));
@@ -103,9 +104,13 @@ app.use("/api", (req, res) => {
   res.status(404).json({ message: `Route ${req.method} ${req.originalUrl} not found` });
 });
 
-// SPA fallback - serve index.html for non-API routes
+// SPA fallback - serve React index.html for non-API routes
 app.use((req, res) => {
   if (req.method === "GET") {
+    const reactIndex = path.join(__dirname, "../frontend-react/dist/index.html");
+    if (fs.existsSync(reactIndex)) {
+      return res.sendFile(reactIndex);
+    }
     res.sendFile(path.join(__dirname, "../frontend/index.html"));
   } else {
     res.status(404).json({ message: "Not found" });

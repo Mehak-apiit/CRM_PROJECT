@@ -1,18 +1,31 @@
 import Employee from "../models/Employee.js";
+import User from "../models/User.js";
+import bcrypt from "bcryptjs";
 
 
 // ➕ CREATE EMPLOYEE (ADMIN)
 export const createEmployee = async (req, res) => {
   try {
-    const { userId, name, email, phone, department, designation } = req.body;
+    const { name, email, phone, department, designation } = req.body;
 
-    const exists = await Employee.findOne({ userId });
+    const exists = await Employee.findOne({ email });
     if (exists) {
       return res.status(400).json({ message: "Employee already exists" });
     }
 
+    let user = await User.findOne({ email });
+    if (!user) {
+      const hashedPassword = await bcrypt.hash("employee123", 10);
+      user = await User.create({
+        name,
+        email,
+        password: hashedPassword,
+        role: "employee"
+      });
+    }
+
     const employee = await Employee.create({
-      userId,
+      userId: user._id,
       name,
       email,
       phone,
@@ -20,7 +33,11 @@ export const createEmployee = async (req, res) => {
       designation
     });
 
-    res.status(201).json(employee);
+    res.status(201).json({
+      message: "Employee created successfully",
+      employee,
+      loginCredentials: { email, password: "employee123" }
+    });
 
   } catch (error) {
     res.status(500).json({ message: error.message });

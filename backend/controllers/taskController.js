@@ -12,9 +12,7 @@ export const createTask = async (req,res)=>{
 //Get Tasks
 export const getTasks = async(req,res)=>{
     try {
-        const tasks = await Task.find()
-        .populate("assignedTo")
-        .populate("project")
+        const tasks = await Task.find();
         res.json(tasks);
     } catch (error) {
         res.status(500).json({message:error.message});

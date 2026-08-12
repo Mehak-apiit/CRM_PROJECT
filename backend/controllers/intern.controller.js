@@ -18,6 +18,7 @@ export const createIntern = async (req, res) => {
             highestQualification,
             graduationYear,
             internshipStatus,
+            techStack,
         } = req.body;
         const hashedPassword = await bcrypt.hash(password || "intern123", 10);
         const intern = await Intern.create({
@@ -29,6 +30,7 @@ export const createIntern = async (req, res) => {
             highestQualification,
             graduationYear,
             internshipStatus,
+            techStack,
         });
         const user = await User.create({
             name,
@@ -107,9 +109,8 @@ export const issueCertificate = async (req, res) => {
         });
 
         await Document.create({
-            name: `Internship Certificate - ${intern.name}`,
-            category: "Internship Certificate",
-            fileUrl: certPath,
+            documentType: "qualification",
+            documentUrl: certPath,
             owner: intern._id,
             ownerModel: "Intern",
             uploadedBy: req.user._id,
